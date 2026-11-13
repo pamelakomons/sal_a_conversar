@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sal a conversar</title>
+<meta name="description" content="Calles, materiales y formaciones para quienes salen a conversar.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#1B4B9B">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚪</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --acera: #E8ECF1;
+    --papel: #FFFFFF;
+    --tinta: #13233F;
+    --tinta-2: #4E5D77;
+    --linea: #D1D9E4;
+    --esmalte: #1B4B9B;
+    --esmalte-texto: #1B4B9B;
+    --aviso: #FFC72C;
+    --aviso-tinta: #13233F;
+    --figura-2: #6C93DB;
+    --ok: #17734D;
+    --foco: #1B4B9B;
+    --cuerpo: 'Barlow', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --rotulo: 'Barlow Condensed', 'Arial Narrow', 'Roboto Condensed', sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --acera: #0E1828;
+      --papel: #172338;
+      --tinta: #EDF2F9;
+      --tinta-2: #A7B5CB;
+      --linea: #2B3B57;
+      --esmalte: #2459B8;
+      --esmalte-texto: #9DBDF7;
+      --figura-2: #6C93DB;
+      --ok: #5AD19A;
+      --foco: #FFC72C;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --acera: #0E1828;
+    --papel: #172338;
+    --tinta: #EDF2F9;
+    --tinta-2: #A7B5CB;
+    --linea: #2B3B57;
+    --esmalte: #2459B8;
+    --esmalte-texto: #9DBDF7;
+    --figura-2: #6C93DB;
+    --ok: #5AD19A;
+    --foco: #FFC72C;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  :root {
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--acera);
+    color: var(--tinta);
+    font-family: var(--cuerpo);
+    font-size: 17px;
+    line-height: 1.45;
+    padding-bottom: 96px;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0 0 auto;
+    height: env(safe-area-inset-top, 0px);
+    z-index: 10;
+    background: var(--acera);
+  }
+  h1, h2, p, ul { margin: 0; }
+  ul { padding: 0; list-style: none; }
+  button { font: inherit; color: inherit; }
+  :focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
+  [hidden] { display: none !important; }
+
+  .col { max-width: 560px; margin: 0 auto; padding: 0 16px; }
+
+  /* La placa de calle: el único gesto fuerte de la interfaz */
+  .placa {
+    position: relative;
+    display: block;
+    background: var(--esmalte);
+    color: #fff;
+    padding: 15px 20px 16px;
+    font-family: var(--rotulo);
+  }
+  .placa::after {
+    content: "";
+    position: absolute;
+    inset: 5px;
+    border: 1.5px solid rgba(255, 255, 255, .8);
+    border-radius: 4px;
+    pointer-events: none;
+  }
+  .placa-tipo { display: block; font-size: 1rem; font-weight: 500; line-height: 1.15; opacity: .92; }
+  .placa-nombre { display: block; font-size: 1.75rem; font-weight: 600; line-height: 1.05; letter-spacing: .01em; overflow-wrap: anywhere; }
+
+  .cabecera { padding: 16px 0 4px; }
+  .marca {
+    display: inline-block;
+    border-radius: 8px;
+    padding: 9px 18px 10px;
+    font-size: 1.35rem;
+    font-weight: 600;
+    letter-spacing: .01em;
+  }
+
+  .vista { padding-top: 20px; }
+  .titulo { font-family: var(--rotulo); font-weight: 600; font-size: 2.1rem; line-height: 1.05; letter-spacing: .005em; }
+  .entrada { color: var(--tinta-2); margin-top: 6px; max-width: 34em; }
+
+  /* Provincias */
+  .provincias { display: grid; gap: 10px; margin-top: 20px; }
+  @media (min-width: 440px) { .provincias { grid-template-columns: 1fr 1fr; } }
+  .provincia {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    text-align: left;
+    background: var(--papel);
+    border: 1.5px solid transparent;
+    border-radius: 10px;
+    padding: 16px 16px 15px;
+    min-height: 76px;
+    cursor: pointer;
+  }
+  .provincia:hover { border-color: var(--esmalte-texto); }
+  .provincia-nombre { display: block; font-family: var(--rotulo); font-weight: 600; font-size: 1.6rem; line-height: 1.1; }
+  .provincia-dato { display: block; color: var(--tinta-2); font-size: .95rem; margin-top: 2px; }
+  .provincia svg { flex: none; color: var(--esmalte-texto); }
+  .provincia { align-items: flex-start; }
+  .provincia-conv {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 11px 4px;
+    border-radius: 999px;
+    background: var(--aviso);
+    color: var(--aviso-tinta);
+    font-family: var(--rotulo);
+    font-weight: 700;
+    font-size: 1.3rem;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+  }
+  .provincia-conv svg { color: inherit; }
+  .provincia-conv--cero { background: transparent; box-shadow: inset 0 0 0 1.5px var(--linea); color: var(--tinta-2); }
+  .oculto { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+  /* Marcador general: la placa grande con todas las conversaciones */
+  .marcador { margin-top: 16px; border-radius: 10px; padding: 20px 22px 21px; }
+  .marcador-num { display: block; font-weight: 700; font-size: 4.4rem; line-height: .95; font-variant-numeric: tabular-nums; }
+  .marcador-txt { display: block; font-family: var(--cuerpo); font-size: 1.05rem; line-height: 1.3; margin-top: 4px; }
+  .marcador-tuyas { display: block; font-family: var(--cuerpo); font-weight: 600; color: var(--aviso); margin-top: 2px; }
+  .marcador-gente { display: flex; align-items: flex-end; margin-top: 14px; padding-left: 7px; }
+  .marcador .figura { color: #C5D6F6; }
+  .marcador .figura:nth-child(even) { color: #fff; }
+  .marcador .figura--yo, .marcador .figura--yo:nth-child(even) { color: var(--aviso); }
+  .marcador .figura path, .marcador .figura circle { stroke: var(--esmalte); }
+  .marcador + .entrada { margin-top: 14px; }
+
+  /* Cabecera de la provincia elegida */
+  .donde { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+  .btn-texto {
+    flex: none;
+    background: none;
+    border: 0;
+    padding: 0 2px;
+    min-height: 44px;
+    color: var(--esmalte-texto);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+  .resumen { margin-top: 8px; color: var(--tinta-2); line-height: 1.3; }
+  .resumen-num { font-family: var(--rotulo); font-weight: 700; font-size: 1.9rem; line-height: 1; color: var(--tinta); margin-right: 2px; }
+  .resumen-tuyas { color: var(--tinta); font-weight: 500; }
+
+  .buscar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 16px;
+    background: var(--papel);
+    border: 1.5px solid var(--linea);
+    border-radius: 10px;
+    padding: 0 14px;
+    min-height: 52px;
+    color: var(--tinta-2);
+  }
+  .buscar:focus-within { border-color: var(--foco); }
+  .buscar input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: var(--tinta);
+    min-height: 48px;
+    outline: none;
+  }
+  .buscar input::placeholder { color: var(--tinta-2); opacity: 1; }
+
+  .zonas {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 5;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    margin: 6px -16px 0;
+    padding: 10px 16px;
+    background: var(--acera);
+    scrollbar-width: none;
+  }
+  .zonas::-webkit-scrollbar { display: none; }
+  .zona-chip {
+    flex: none;
+    min-height: 42px;
+    padding: 0 15px;
+    border-radius: 21px;
+    border: 1.5px solid var(--linea);
+    background: var(--papel);
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .zona-chip[aria-pressed="true"] { background: var(--tinta); border-color: var(--tinta); color: var(--acera); font-weight: 600; }
+
+  .zona { margin-top: 18px; }
+  .zona:first-child { margin-top: 8px; }
+  .zona-cab { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+  .zona-cab h2 { font-family: var(--rotulo); font-weight: 600; font-size: 1.45rem; line-height: 1.1; }
+  .zona-cab span { color: var(--tinta-2); font-size: .95rem; text-align: right; }
+
+  .calles { display: grid; gap: 12px; }
+  .calle { background: var(--papel); border-radius: 10px; overflow: hidden; }
+  .calle-cuerpo { padding: 14px 16px 16px; }
+  .tramo-fila { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .llegar {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 0;
+    margin: -10px 0;
+    color: var(--esmalte-texto);
+    font-weight: 600;
+    font-size: .95rem;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .tramo { display: flex; align-items: flex-start; gap: 9px; font-weight: 500; }
+  .tramo svg { flex: none; margin-top: 3px; color: var(--esmalte-texto); }
+  .nota-calle { color: var(--tinta-2); font-size: .95rem; margin-top: 6px; padding-left: 27px; }
+  .acciones { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+  @media (max-width: 330px) { .acciones { grid-template-columns: 1fr; } }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 0 14px;
+    border-radius: 8px;
+    border: 1.5px solid transparent;
+    font-family: var(--cuerpo);
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.15;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .btn--ir { background: var(--aviso); color: var(--aviso-tinta); }
+  .btn--borde { background: transparent; border-color: var(--linea); color: var(--tinta); }
+  .sumar-fila { display: flex; gap: 8px; margin-top: 12px; }
+  .btn--sumar { background: var(--aviso); color: var(--aviso-tinta); }
+  .calle .acciones .btn { padding: 0 8px; white-space: nowrap; }
+  .btn--sumar:active { transform: scale(.98); }
+  .btn--quitar { flex: none; width: 58px; min-height: 58px; padding: 0; font-family: var(--rotulo); font-size: 1.35rem; }
+  .btn[disabled] { opacity: .5; cursor: default; }
+
+  /* El contador de personas de cada calle */
+  .contador {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    min-height: 68px;
+    margin-top: 14px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: var(--acera);
+  }
+  .contador-cifra { display: flex; align-items: center; gap: 9px; flex: none; }
+  .contador-num {
+    display: inline-block;
+    font-family: var(--rotulo);
+    font-weight: 700;
+    font-size: 2.6rem;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    transform-origin: left center;
+  }
+  .contador-txt { color: var(--tinta-2); font-size: .95rem; line-height: 1.2; }
+  .contador-txt b { color: var(--tinta); font-weight: 600; }
+  .gente { display: flex; align-items: flex-end; margin-left: auto; padding-left: 7px; }
+  .figura { flex: none; width: 24px; height: 34px; margin-left: -7px; color: var(--esmalte); }
+  .figura:nth-child(even) { color: var(--figura-2); }
+  .figura--yo, .figura--yo:nth-child(even) { color: var(--aviso); }
+  .figura path, .figura circle { fill: currentColor; stroke: var(--acera); stroke-width: 2; paint-order: stroke; }
+  .gente-mas { margin-left: 5px; font-weight: 600; font-size: .95rem; color: var(--tinta-2); white-space: nowrap; }
+
+  @keyframes entra {
+    0% { transform: translateY(-24px) scale(.4); opacity: 0; }
+    60% { transform: translateY(3px) scale(1.15); opacity: 1; }
+    100% { transform: none; opacity: 1; }
+  }
+  @keyframes bote {
+    0% { transform: scale(1); }
+    35% { transform: scale(1.4); }
+    100% { transform: scale(1); }
+  }
+  @keyframes chispa {
+    from { transform: translate(0, 0) rotate(0); opacity: 1; }
+    to { transform: translate(var(--dx), var(--dy)) rotate(240deg); opacity: 0; }
+  }
+  .figura.entra { animation: entra .5s cubic-bezier(.3, 1.4, .5, 1) both; }
+  .bote { animation: bote .45s ease-out; }
+  .chispa {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    pointer-events: none;
+    animation: chispa .75s ease-out forwards;
+  }
+
+  .vacio { background: var(--papel); border-radius: 10px; padding: 20px 16px; margin-top: 8px; }
+  .vacio p { margin-bottom: 14px; }
+  .pie-nota { color: var(--tinta-2); font-size: .9rem; margin-top: 20px; }
+
+  /* Materiales: una hoja con filas, no tarjetas sueltas */
+  .grupo { margin-top: 24px; }
+  .grupo h2 { font-family: var(--rotulo); font-weight: 600; font-size: 1.45rem; line-height: 1.1; margin-bottom: 10px; }
+  .hoja { background: var(--papel); border-radius: 10px; overflow: hidden; }
+  .hoja li + li { border-top: 1px solid var(--linea); }
+  .fila {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    min-height: 76px;
+    background: none;
+    border: 0;
+    text-align: left;
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .fila:hover .fila-titulo { text-decoration: underline; text-underline-offset: 3px; }
+  .tipo {
+    flex: none;
+    width: 52px;
+    height: 52px;
+    border-radius: 8px;
+    background: var(--acera);
+    color: var(--esmalte-texto);
+    display: grid;
+    place-items: center;
+    font-family: var(--rotulo);
+    font-weight: 600;
+    font-size: 1rem;
+  }
+  .fila-texto { flex: 1; min-width: 0; }
+  .fila-titulo { display: block; font-weight: 600; line-height: 1.25; }
+  .fila-desc { display: block; color: var(--tinta-2); font-size: .95rem; line-height: 1.35; margin-top: 2px; }
+  .fila > svg { flex: none; color: var(--tinta-2); }
+  .fila--sin { cursor: default; }
+  .fila--sin:hover .fila-titulo { text-decoration: none; }
+  .pronto { flex: none; font-size: .85rem; color: var(--tinta-2); border: 1.5px solid var(--linea); border-radius: 999px; padding: 2px 10px; }
+  .tipo { overflow: hidden; }
+  .nota-calle--sola { padding-left: 0; margin-top: 0; }
+  .sesion-pronto { margin-top: 12px; }
+
+  /* Formaciones */
+  .sesiones { display: grid; gap: 12px; margin-top: 20px; }
+  .sesion { background: var(--papel); border-radius: 10px; padding: 16px; }
+  .sesion-cab { display: flex; gap: 14px; align-items: flex-start; }
+  .fecha { flex: none; width: 56px; padding: 7px 0 6px; border-radius: 8px; background: var(--acera); text-align: center; }
+  .fecha b { display: block; font-family: var(--rotulo); font-weight: 600; font-size: 1.7rem; line-height: 1; }
+  .fecha span { display: block; font-size: .85rem; color: var(--tinta-2); margin-top: 1px; }
+  .sesion h2 { font-size: 1.1rem; font-weight: 600; line-height: 1.25; }
+  .sesion-desc { color: var(--tinta-2); font-size: .95rem; margin-top: 3px; }
+  .sesion-dur { color: var(--tinta-2); font-size: .9rem; margin-top: 4px; }
+  .sesion .acciones { margin-top: 14px; }
+  .sesion .acciones.una { grid-template-columns: 1fr; }
+  .sesion .btn { font-size: .95rem; padding: 0 8px; }
+
+  /* Pestañas */
+  .pestanas {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
+    background: var(--papel);
+    border-top: 1px solid var(--linea);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .pestanas-dentro { display: flex; max-width: 560px; margin: 0 auto; }
+  .pestana {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-height: 64px;
+    color: var(--tinta-2);
+    font-size: .85rem;
+    font-weight: 500;
+    text-decoration: none;
+  }
+  .pestana[aria-current="page"] { color: var(--tinta); font-weight: 600; }
+  .pestana[aria-current="page"]::before {
+    content: "";
+    position: absolute;
+    top: -1px;
+    left: 22%;
+    right: 22%;
+    height: 4px;
+    border-radius: 0 0 4px 4px;
+    background: var(--aviso);
+  }
+
+  .toast {
+    position: fixed;
+    left: 16px;
+    right: 16px;
+    bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+    z-index: 30;
+    max-width: 528px;
+    margin: 0 auto;
+    background: var(--tinta);
+    color: var(--acera);
+    border-radius: 10px;
+    padding: 13px 16px;
+    font-size: .95rem;
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
+    transition: opacity .2s ease, transform .2s ease;
+  }
+  .toast.visible { opacity: 1; transform: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header class="cabecera">
+  <div class="col">
+    <span class="placa marca">Sal a conversar</span>
+  </div>
+</header>
+
+<main class="col">
+  <section class="vista" id="v-calles" aria-label="Calles"></section>
+  <section class="vista" id="v-materiales" aria-label="Materiales" hidden></section>
+  <section class="vista" id="v-formaciones" aria-label="Formaciones" hidden></section>
+</main>
+
+<nav class="pestanas" aria-label="Secciones">
+  <div class="pestanas-dentro">
+    <a class="pestana" href="#calles" data-vista="calles">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 12 2.5a7 7 0 0 1 7 7C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+      Calles
+    </a>
+    <a class="pestana" href="#materiales" data-vista="materiales">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 12h6M9 16h6"/></svg>
+      Materiales
+    </a>
+    <a class="pestana" href="#formaciones" data-vista="formaciones">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9.5v5l4.5-2.5z"/></svg>
+      Formaciones
+    </a>
+  </div>
+</nav>
+
+<script>
+/* ============================================================
+   SAL A CONVERSAR
+   Los datos (calles, materiales, formaciones) y el contador de
+   conversaciones viven en el Google Sheet. Esta página los pide al
+   Apps Script publicado como aplicación web.
+   ============================================================ */
+const API = 'https://script.google.com/macros/s/AKfycbwKw-ePZ7au3QTooiBc2gelvk4JRyVvfy78jkQQsy_ZuDtH1HnGgrrnrUQDqPkIbFXAWQ/exec';
+const REFRESCO = 25000;       // cada cuánto se actualizan los totales (ms)
+const MAX_POR_ENVIO = 50;     // el mismo tope que tiene el Apps Script
+
+let CALLES = [], MATERIALES = [], FORMACIONES = [], PROVINCIAS = [];
+
+/* ============================================================
+   Utilidades
+   ============================================================ */
+const $ = (sel, raiz) => (raiz || document).querySelector(sel);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const norm = s => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+const plural = (n, uno, varios) => n + ' ' + (n === 1 ? uno : varios);
+const texto = v => (v === null || v === undefined ? '' : String(v).trim());
+const enlaceSeguro = v => (/^https?:\/\//i.test(texto(v)) ? texto(v) : '');
+
+const guardado = {
+  leer(clave, porDefecto) {
+    try {
+      const v = localStorage.getItem(clave);
+      return v === null ? porDefecto : JSON.parse(v);
+    } catch (e) { return porDefecto; }
+  },
+  escribir(clave, valor) {
+    try { localStorage.setItem(clave, JSON.stringify(valor)); } catch (e) { /* sin almacenamiento: sigue funcionando */ }
+  }
+};
+
+const idCalle = c => [c.provincia, c.municipio, c.zona, c.calle, c.tramo].join('|');
+const idZona = c => c.municipio + '|' + c.zona;
+
+const ICONO = {
+  lupa: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.8-3.8"/></svg>',
+  puerta: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17"/><path d="M3 21h18"/><path d="M14.5 12.5v.5"/></svg>',
+  ruta: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4z"/></svg>',
+  bocadillo: '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 3h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-8l-6 5v-5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg>',
+  mas: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
+  abrir: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>'
+};
+
+// Pide algo al Apps Script y devuelve su respuesta. Falla si no hay red o tarda demasiado.
+async function pedir(url, opciones) {
+  const control = new AbortController();
+  const reloj = setTimeout(() => control.abort(), 20000);
+  try {
+    const r = await fetch(url, Object.assign({ signal: control.signal }, opciones || {}));
+    if (!r.ok) throw new Error('http ' + r.status);
+    return await r.json();
+  } finally {
+    clearTimeout(reloj);
+  }
+}
+
+/* ============================================================
+   Estado
+   ============================================================ */
+const estado = {
+  carga: 'cargando',       // 'cargando' | 'lista' | 'error'
+  conexion: true,
+  provincia: guardado.leer('sac:provincia', null),
+  zona: 'todas',
+  busqueda: ''
+};
+
+/* El total de cada calle es lo que dice el Sheet más lo que esta persona ha
+   sumado y aún no ha llegado: así el número sube al instante al pulsar. */
+const suma = {
+  servidor: new Map(),     // calle -> conversaciones según el Sheet
+  pendientes: new Map(),   // calle -> sumadas aquí, a la espera de enviarse
+  enVuelo: new Map(),      // calle -> enviándose ahora mismo
+  cuentas: new Map()
+};
+(function recuperarPendientes() {
+  const p = guardado.leer('sac:pendientes', {});
+  if (p && typeof p === 'object') Object.keys(p).forEach(id => {
+    const n = Math.floor(Number(p[id]));
+    if (n > 0) suma.pendientes.set(id, n);
+  });
+})();
+const guardarPendientes = () => guardado.escribir('sac:pendientes', Object.fromEntries(suma.pendientes));
+
+let enviando = false, relojEnviar, ultimaFirma = '';
+const MAX_FIGURAS = 5;
+
+function recontar() {
+  const m = new Map();
+  const sumar = (n, id) => m.set(id, (m.get(id) || 0) + n);
+  suma.servidor.forEach(sumar);
+  suma.pendientes.forEach(sumar);
+  suma.enVuelo.forEach(sumar);
+  suma.cuentas = m;
+}
+function ponerTotales(obj) {
+  const m = new Map();
+  if (obj && typeof obj === 'object') Object.keys(obj).forEach(id => {
+    const n = Math.floor(Number(obj[id]));
+    if (n > 0) m.set(id, n);
+  });
+  suma.servidor = m;
+  recontar();
+}
+const cuenta = id => suma.cuentas.get(id) || 0;
+const filasProvincia = () => CALLES.filter(c => c.provincia === estado.provincia);
+
+// Conversaciones de una provincia, o de todas si no se indica ninguna
+function totalDe(provincia) {
+  let todas = 0;
+  CALLES.forEach(c => { if (!provincia || c.provincia === provincia) todas += cuenta(idCalle(c)); });
+  return todas;
+}
+function firma() {
+  return estado.conexion + '|' + filasProvincia().map(c => cuenta(idCalle(c))).join(',');
+}
+
+/* ============================================================
+   Cargar los datos del Sheet
+   ============================================================ */
+function aplicarDatos(d) {
+  CALLES = (Array.isArray(d.calles) ? d.calles : [])
+    .map(c => ({ provincia: texto(c.provincia), municipio: texto(c.municipio), zona: texto(c.zona), calle: texto(c.calle), tramo: texto(c.tramo), nota: texto(c.nota) }))
+    .filter(c => c.provincia && c.calle);
+  MATERIALES = (Array.isArray(d.materiales) ? d.materiales : [])
+    .map(m => ({ grupo: texto(m.grupo) || 'Materiales', titulo: texto(m.titulo), descripcion: texto(m.descripcion), tipo: texto(m.tipo) || 'Doc', enlace: enlaceSeguro(m.enlace) }))
+    .filter(m => m.titulo);
+  FORMACIONES = (Array.isArray(d.formaciones) ? d.formaciones : [])
+    .map(f => ({ titulo: texto(f.titulo), fecha: texto(f.fecha), duracion: texto(f.duracion), descripcion: texto(f.descripcion), video: enlaceSeguro(f.video), presentacion: enlaceSeguro(f.presentacion) }))
+    .filter(f => f.titulo);
+  PROVINCIAS = [...new Set(CALLES.map(c => c.provincia))].sort((a, b) => a.localeCompare(b, 'es'));
+  if (!PROVINCIAS.includes(estado.provincia)) estado.provincia = null;
+  ponerTotales(d.conversaciones);
+  estado.carga = 'lista';
+}
+
+async function cargar() {
+  try {
+    const d = await pedir(API + '?accion=datos');
+    if (!d || !d.ok) throw new Error((d && d.error) || 'respuesta');
+    const contenido = JSON.stringify([d.calles, d.materiales, d.formaciones]);
+    const mismoContenido = estado.carga === 'lista' && contenido === contenidoPintado;
+    guardado.escribir('sac:datos', { calles: d.calles, materiales: d.materiales, formaciones: d.formaciones, conversaciones: d.conversaciones });
+    estado.conexion = true;
+    if (mismoContenido) {
+      const antes = new Map(suma.cuentas);
+      ponerTotales(d.conversaciones);
+      actualizarTotales(antes);
+    } else {
+      aplicarDatos(d);
+      contenidoPintado = contenido;
+      pintarTodo();
+    }
+    if (suma.pendientes.size) enviar();
+  } catch (e) {
+    if (estado.carga === 'lista') { estado.conexion = false; actualizarTotales(null); }
+    else { estado.carga = 'error'; pintarTodo(); }
+  }
+}
+let contenidoPintado = '';
+
+// Solo los totales, cada poco, mientras la página está a la vista
+async function refrescar() {
+  if (document.visibilityState !== 'visible' || estado.carga !== 'lista' || enviando) return;
+  try {
+    const d = await pedir(API + '?accion=totales');
+    if (!d || !d.ok || enviando) return;
+    const antes = new Map(suma.cuentas);
+    ponerTotales(d.conversaciones);
+    estado.conexion = true;
+    actualizarTotales(antes);
+    if (suma.pendientes.size) enviar();
+  } catch (e) {
+    if (estado.conexion) { estado.conexion = false; actualizarTotales(null); }
+  }
+}
+
+// Repinta lo que muestra números, animando las calles donde alguien ha sumado
+function actualizarTotales(antes) {
+  if (estado.carga !== 'lista') return;
+  if (!estado.provincia) { pintarSelector(); return; }
+  if (firma() === ultimaFirma) return;
+  const animar = new Map();
+  if (antes) filasProvincia().forEach(c => {
+    const id = idCalle(c);
+    if (cuenta(id) > (antes.get(id) || 0)) animar.set(id, 'otra');
+  });
+  pintarLista(animar);
+}
+
+/* ============================================================
+   Enviar las conversaciones sumadas
+   ============================================================ */
+function programarEnvio() {
+  clearTimeout(relojEnviar);
+  relojEnviar = setTimeout(enviar, 700);   // varios toques seguidos viajan juntos
+}
+
+async function enviar() {
+  if (enviando || !suma.pendientes.size) return;
+  enviando = true;
+  const antes = new Map(suma.cuentas);
+  let fallo = false;
+  try {
+    while (suma.pendientes.size && !fallo) {
+      const [id, total] = suma.pendientes.entries().next().value;
+      const n = Math.min(total, MAX_POR_ENVIO);
+      if (total > n) suma.pendientes.set(id, total - n); else suma.pendientes.delete(id);
+      suma.enVuelo.set(id, n);
+      guardarPendientes();
+      try {
+        const r = await pedir(API, { method: 'POST', body: JSON.stringify({ accion: 'sumar', calle: id, n: n }), keepalive: true });
+        suma.enVuelo.delete(id);
+        if (r && r.ok) ponerTotales(r.conversaciones);
+        else if (!r || r.error !== 'calle_desconocida') throw new Error((r && r.error) || 'respuesta');
+      } catch (e) {
+        // No ha llegado: se guarda para volver a intentarlo
+        suma.enVuelo.delete(id);
+        suma.pendientes.set(id, (suma.pendientes.get(id) || 0) + n);
+        guardarPendientes();
+        fallo = true;
+      }
+    }
+  } finally {
+    enviando = false;
+  }
+  recontar();
+  estado.conexion = !fallo;
+  actualizarTotales(antes);
+}
+
+/* ============================================================
+   Calles
+   ============================================================ */
+// «Calle de la Oca» se rotula como en una placa: tipo de vía pequeño, nombre grande
+function rotulo(nombre) {
+  const m = nombre.match(/^(Calle|Avenida|Paseo|Plaza|Camino|Ronda|Travesía|Carretera|Glorieta|Pasaje|Callejón)((?:\s+(?:de las|de los|de la|del|de))?)\s+(.+)$/i);
+  if (!m) return '<span class="placa-nombre">' + esc(nombre) + '</span>';
+  return '<span class="placa-tipo">' + esc(m[1] + m[2]) + '</span><span class="placa-nombre">' + esc(m[3]) + '</span>';
+}
+
+const figura = clases => '<svg class="figura' + clases + '" viewBox="0 0 24 34" aria-hidden="true">' +
+  '<path d="M2 34v-7a10 10 0 0 1 20 0v7z"/><circle cx="12" cy="8.5" r="6.5"/></svg>';
+
+const AVISO_SIN_RED = 'Sin conexión: los totales pueden no estar al día. Lo que sumes se enviará cuando vuelva.';
+
+// Lo que se ve mientras llegan los datos, o si no llegan
+function avisoCarga(titulo, cosa) {
+  if (estado.carga === 'cargando') return '<h1 class="titulo">' + titulo + '</h1><p class="entrada">Cargando ' + cosa + '…</p>';
+  return '<h1 class="titulo">' + titulo + '</h1><div class="vacio"><p>No se han podido cargar ' + cosa +
+    '. Comprueba tu conexión y vuelve a intentarlo.</p><button class="btn btn--borde" data-reintentar>Volver a intentar</button></div>';
+}
+
+let marcadorPintado = null;      // último total mostrado en el marcador
+const provinciasPintadas = {};   // último total mostrado en cada provincia
+
+// El número sube contando hasta su valor
+function contarHasta(el, desde, hasta) {
+  if (!el) return;
+  const quieto = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (quieto || desde === hasta) { el.textContent = hasta; return; }
+  const inicio = performance.now(), dura = 900;
+  const paso = ahora => {
+    if (!el.isConnected) return;
+    const t = Math.min(1, Math.max(0, (ahora - inicio) / dura));
+    el.textContent = Math.round(desde + (hasta - desde) * (1 - Math.pow(1 - t, 3)));
+    if (t < 1) requestAnimationFrame(paso);
+  };
+  requestAnimationFrame(paso);
+}
+
+function pintarSelector() {
+  const total = totalDe(null);
+  const estreno = marcadorPintado === null;
+  const tarjetas = PROVINCIAS.map(p => {
+    const filas = CALLES.filter(c => c.provincia === p);
+    const zonas = new Set(filas.map(idZona)).size;
+    const n = totalDe(p);
+    const sube = !estreno && n > (provinciasPintadas[p] || 0);
+    provinciasPintadas[p] = n;
+    return '<li><button class="provincia" data-provincia="' + esc(p) + '">' +
+      '<span><span class="provincia-nombre">' + esc(p) + '</span>' +
+      '<span class="provincia-dato">' + plural(filas.length, 'calle', 'calles') + ' en ' + plural(zonas, 'zona', 'zonas') + '</span></span>' +
+      '<span class="provincia-conv' + (n ? '' : ' provincia-conv--cero') + (sube ? ' bote' : '') + '">' + ICONO.bocadillo +
+      n + '<span class="oculto"> ' + (n === 1 ? 'conversación' : 'conversaciones') + '</span>' +
+      '</span></button></li>';
+  }).join('');
+
+  const figs = Math.min(total, 12);
+  let gente = '';
+  for (let i = 0; i < figs; i++) {
+    const f = figura(estreno ? ' entra' : '');
+    gente += estreno ? f.replace('<svg ', '<svg style="animation-delay:' + (i * 60) + 'ms" ') : f;
+  }
+  const marcador = '<span class="marcador-num" id="marcador-num">' + (estreno ? 0 : marcadorPintado) + '</span>' +
+    '<span class="marcador-txt">' + (total === 0 ? 'Todavía no hay conversaciones. La primera puede ser tuya.'
+      : (total === 1 ? 'conversación' : 'conversaciones') + ' entre todas las provincias') + '</span>' +
+    (figs ? '<span class="marcador-gente" aria-hidden="true">' + gente + '</span>' : '');
+
+  $('#v-calles').innerHTML =
+    '<h1 class="titulo">¿Dónde vas a conversar?</h1>' +
+    '<div class="placa marcador">' + marcador + '</div>' +
+    '<p class="entrada">Elige tu provincia, sal a la calle y suma cada conversación que tengas.</p>' +
+    '<ul class="provincias">' + tarjetas + '</ul>' +
+    (estado.conexion ? '' : '<p class="pie-nota">' + AVISO_SIN_RED + '</p>');
+  contarHasta($('#marcador-num'), estreno ? 0 : marcadorPintado, total);
+  marcadorPintado = total;
+}
+
+function pintarProvincia() {
+  const filas = filasProvincia();
+  const zonas = [];
+  filas.forEach(c => {
+    if (!zonas.some(z => z.id === idZona(c))) zonas.push({ id: idZona(c), nombre: c.zona || c.municipio || 'Calles', municipio: c.municipio });
+  });
+  const repetidas = zonas.filter((z, i) => zonas.some((o, j) => j !== i && o.nombre === z.nombre)).map(z => z.id);
+  const etiqueta = z => z.nombre + (z.municipio && z.municipio !== z.nombre &&
+    (repetidas.includes(z.id) || z.municipio !== estado.provincia) ? ' (' + z.municipio + ')' : '');
+  const chips = zonas.length < 2 ? '' :
+    '<div class="zonas" role="group" aria-label="Filtrar por zona">' +
+    '<button class="zona-chip" data-zona="todas" aria-pressed="true">Todas</button>' +
+    zonas.map(z => '<button class="zona-chip" data-zona="' + esc(z.id) + '" aria-pressed="false">' + esc(etiqueta(z)) + '</button>').join('') +
+    '</div>';
+
+  $('#v-calles').innerHTML =
+    '<div class="donde"><h1 class="titulo">Calles de ' + esc(estado.provincia) + '</h1>' +
+    '<button class="btn-texto" id="cambiar-provincia">Cambiar provincia</button></div>' +
+    '<p class="resumen" id="resumen"></p>' +
+    '<label class="buscar">' + ICONO.lupa +
+    '<input type="search" id="buscar" placeholder="Busca una calle o una zona" aria-label="Busca una calle o una zona" autocomplete="off" value="' + esc(estado.busqueda) + '"></label>' +
+    chips +
+    '<div id="lista"></div>' +
+    '<p class="pie-nota" id="pie-calles"></p>';
+  pintarLista();
+}
+
+// animar: Map de id de calle -> 'mia' (acabo de sumar) | 'otra' (ha sumado otra persona)
+function pintarLista(animar) {
+  if (!estado.provincia || !$('#lista')) return;
+  animar = animar || new Map();
+  ultimaFirma = firma();
+  const filas = filasProvincia();
+
+  const total = totalDe(estado.provincia);
+  $('#resumen').innerHTML = total === 0 ? 'Aún no hay conversaciones en ' + esc(estado.provincia) + '. Suma la primera.'
+    : '<span class="resumen-num' + (animar.size ? ' bote' : '') + '" style="display:inline-block">' + total + '</span> ' +
+      (total === 1 ? 'conversación' : 'conversaciones') + ' en ' + esc(estado.provincia);
+  $('#pie-calles').textContent = estado.conexion ? '' : AVISO_SIN_RED;
+  $('#pie-calles').hidden = estado.conexion;
+
+  document.querySelectorAll('.zona-chip').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.zona === estado.zona)));
+
+  const q = norm(estado.busqueda.trim());
+  const visibles = filas.filter(c =>
+    (estado.zona === 'todas' || idZona(c) === estado.zona) &&
+    (!q || norm(c.calle + ' ' + c.zona + ' ' + c.municipio).includes(q)));
+
+  if (!visibles.length) {
+    $('#lista').innerHTML = '<div class="vacio"><p>No hay ninguna calle con «' + esc(estado.busqueda.trim()) +
+      '»' + (estado.zona === 'todas' ? '' : ' en esta zona') + '. Prueba con otro nombre o mira todas las calles.</p>' +
+      '<button class="btn btn--borde" id="ver-todas">Ver todas las calles</button></div>';
+    return;
+  }
+
+  const grupos = [];
+  visibles.forEach(c => {
+    let g = grupos.find(x => x.id === idZona(c));
+    if (!g) { g = { id: idZona(c), zona: c.zona, municipio: c.municipio, calles: [] }; grupos.push(g); }
+    g.calles.push(c);
+  });
+
+  $('#lista').innerHTML = grupos.map(g =>
+    '<section class="zona"><div class="zona-cab"><h2>' + esc(g.zona || g.municipio || 'Calles') + '</h2>' +
+    '<span>' + (g.zona && g.municipio ? esc(g.municipio) + ', ' : '') + plural(g.calles.length, 'calle', 'calles') + '</span></div>' +
+    '<ul class="calles">' + g.calles.map(c => tarjetaCalle(c, animar.get(idCalle(c)))).join('') + '</ul></section>'
+  ).join('');
+}
+
+function contador(id, anima) {
+  const n = cuenta(id);
+  if (!n) return '<div class="contador"><p class="contador-txt">Aún no hay conversaciones aquí. Suma la primera.</p></div>';
+  const visibles = Math.min(n, MAX_FIGURAS);
+  let gente = '';
+  for (let i = 0; i < visibles; i++) gente += figura(anima && i === visibles - 1 ? ' entra' : '');
+  if (n > visibles) gente += '<span class="gente-mas">+' + (n - visibles) + '</span>';
+  return '<div class="contador">' +
+    '<p class="contador-cifra"><span class="contador-num' + (anima ? ' bote' : '') + '">' + n + '</span>' +
+    '<span class="contador-txt">' + (n === 1 ? 'conversación' : 'conversaciones') + '<br>en esta calle</span></p>' +
+    '<div class="gente">' + gente + '</div></div>';
+}
+
+function tarjetaCalle(c, anima) {
+  const id = idCalle(c);
+  const mapa = 'https://www.google.com/maps/search/?api=1&query=' +
+    encodeURIComponent([c.calle, c.municipio, c.provincia].filter(Boolean).join(', '));
+  return '<li class="calle">' +
+    '<div class="placa">' + rotulo(c.calle) + '</div>' +
+    '<div class="calle-cuerpo">' +
+    (c.tramo ? '<p class="tramo">' + ICONO.puerta + '<span>' + esc(c.tramo) + '</span></p>' : '') +
+    (c.nota ? '<p class="nota-calle' + (c.tramo ? '' : ' nota-calle--sola') + '">' + esc(c.nota) + '</p>' : '') +
+    contador(id, anima) +
+    '<div class="acciones">' +
+    '<button class="btn btn--sumar" data-sumar="' + esc(id) + '" aria-label="Sumar una conversación">' + ICONO.mas + 'Sumar</button>' +
+    '<a class="btn btn--borde" href="' + esc(mapa) + '" target="_blank" rel="noopener">' + ICONO.ruta + 'Cómo llegar</a>' +
+    '</div></div></li>';
+}
+
+function pintarCalles() {
+  if (estado.carga !== 'lista') { $('#v-calles').innerHTML = avisoCarga('¿Dónde vas a conversar?', 'las calles'); return; }
+  if (!CALLES.length) {
+    $('#v-calles').innerHTML = '<h1 class="titulo">¿Dónde vas a conversar?</h1><p class="entrada">Todavía no hay calles publicadas. Vuelve a mirar en un rato.</p>';
+    return;
+  }
+  if (estado.provincia) pintarProvincia(); else pintarSelector();
+}
+
+// Un pequeño estallido al sumar
+function chispas(id) {
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const boton = [...document.querySelectorAll('[data-sumar]')].find(b => b.dataset.sumar === id);
+  const tarjeta = boton && boton.closest('.calle');
+  const nueva = tarjeta && tarjeta.querySelector('.figura.entra');
+  const caja = tarjeta && tarjeta.querySelector('.contador');
+  if (!nueva || !caja) return;
+  const a = caja.getBoundingClientRect(), b = nueva.getBoundingClientRect();
+  const x = b.left - a.left + b.width / 2 - 4, y = b.top - a.top + 6;
+  const colores = ['var(--aviso)', 'var(--esmalte)', 'var(--figura-2)', 'var(--ok)'];
+  for (let i = 0; i < 12; i++) {
+    const s = document.createElement('span');
+    const ang = (Math.PI * 2 * i) / 12 + Math.random() * .5;
+    const dist = 26 + Math.random() * 26;
+    s.className = 'chispa';
+    s.style.left = x + 'px';
+    s.style.top = y + 'px';
+    s.style.background = colores[i % colores.length];
+    s.style.setProperty('--dx', Math.round(Math.cos(ang) * dist) + 'px');
+    s.style.setProperty('--dy', Math.round(Math.sin(ang) * dist - 14) + 'px');
+    caja.appendChild(s);
+    setTimeout(() => s.remove(), 800);
+  }
+}
+
+$('#v-calles').addEventListener('click', e => {
+  const prov = e.target.closest('[data-provincia]');
+  if (prov) {
+    estado.provincia = prov.dataset.provincia;
+    estado.zona = 'todas';
+    estado.busqueda = '';
+    guardado.escribir('sac:provincia', estado.provincia);
+    pintarCalles();
+    window.scrollTo(0, 0);
+    return;
+  }
+  if (e.target.closest('#cambiar-provincia')) {
+    estado.provincia = null;
+    guardado.escribir('sac:provincia', null);
+    pintarCalles();
+    window.scrollTo(0, 0);
+    return;
+  }
+  const chip = e.target.closest('[data-zona]');
+  if (chip) { estado.zona = chip.dataset.zona; pintarLista(); return; }
+  if (e.target.closest('#ver-todas')) {
+    estado.zona = 'todas';
+    estado.busqueda = '';
+    $('#buscar').value = '';
+    pintarLista();
+    return;
+  }
+  const boton = e.target.closest('[data-sumar]');
+  if (boton) {
+    const id = boton.dataset.sumar;
+    suma.pendientes.set(id, (suma.pendientes.get(id) || 0) + 1);
+    guardarPendientes();
+    recontar();
+    pintarLista(new Map([[id, 'mia']]));
+    const mismo = [...document.querySelectorAll('[data-sumar]')].find(b => b.dataset.sumar === id);
+    if (mismo) mismo.focus({ preventScroll: true });
+    chispas(id);
+    programarEnvio();
+  }
+});
+$('#v-calles').addEventListener('input', e => {
+  if (e.target.id === 'buscar') { estado.busqueda = e.target.value; pintarLista(); }
+});
+
+/* ============================================================
+   Materiales
+   ============================================================ */
+function pintarMateriales() {
+  if (estado.carga !== 'lista') { $('#v-materiales').innerHTML = avisoCarga('Materiales', 'los materiales'); return; }
+  if (!MATERIALES.length) {
+    $('#v-materiales').innerHTML = '<h1 class="titulo">Materiales</h1><p class="entrada">Todavía no hay materiales publicados.</p>';
+    return;
+  }
+  const grupos = [];
+  MATERIALES.forEach(m => {
+    let g = grupos.find(x => x.nombre === m.grupo);
+    if (!g) { g = { nombre: m.grupo, items: [] }; grupos.push(g); }
+    g.items.push(m);
+  });
+  const fila = m => {
+    const dentro = '<span class="tipo">' + esc(m.tipo) + '</span>' +
+      '<span class="fila-texto"><span class="fila-titulo">' + esc(m.titulo) + '</span>' +
+      (m.descripcion ? '<span class="fila-desc">' + esc(m.descripcion) + '</span>' : '') + '</span>';
+    return m.enlace
+      ? '<li><a class="fila" href="' + esc(m.enlace) + '" target="_blank" rel="noopener">' + dentro + ICONO.abrir + '</a></li>'
+      : '<li><div class="fila fila--sin">' + dentro + '<span class="pronto">Pronto</span></div></li>';
+  };
+  $('#v-materiales').innerHTML =
+    '<h1 class="titulo">Materiales</h1>' +
+    '<p class="entrada">Lo que necesitas leer antes de salir y lo que conviene llevar encima. Cada uno se abre directamente.</p>' +
+    grupos.map(g => '<div class="grupo"><h2>' + esc(g.nombre) + '</h2><ul class="hoja">' + g.items.map(fila).join('') + '</ul></div>').join('');
+}
+
+/* ============================================================
+   Formaciones
+   ============================================================ */
+const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+function pintarFormaciones() {
+  if (estado.carga !== 'lista') { $('#v-formaciones').innerHTML = avisoCarga('Formaciones', 'las formaciones'); return; }
+  if (!FORMACIONES.length) {
+    $('#v-formaciones').innerHTML = '<h1 class="titulo">Formaciones</h1><p class="entrada">Todavía no hay formaciones grabadas.</p>';
+    return;
+  }
+  const boton = (url, etiqueta, clase) => '<a class="btn ' + clase + '" href="' + esc(url) + '" target="_blank" rel="noopener">' + etiqueta + '</a>';
+  const sesion = f => {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(f.fecha);
+    const hoja = m && MESES[Number(m[2]) - 1]
+      ? '<div class="fecha"><b>' + Number(m[3]) + '</b><span>' + MESES[Number(m[2]) - 1] + '</span></div>' : '';
+    const detalle = [!hoja && f.fecha ? f.fecha : '', f.duracion ? 'Dura ' + f.duracion : ''].filter(Boolean).join(', ');
+    const botones = (f.video ? boton(f.video, 'Ver grabación', 'btn--ir') : '') +
+      (f.presentacion ? boton(f.presentacion, 'Ver presentación', 'btn--borde') : '');
+    return '<li class="sesion"><div class="sesion-cab">' + hoja +
+      '<div><h2>' + esc(f.titulo) + '</h2>' +
+      (f.descripcion ? '<p class="sesion-desc">' + esc(f.descripcion) + '</p>' : '') +
+      (detalle ? '<p class="sesion-dur">' + esc(detalle) + '</p>' : '') + '</div></div>' +
+      (botones ? '<div class="acciones' + (f.video && f.presentacion ? '' : ' una') + '">' + botones + '</div>'
+        : '<p class="sesion-dur sesion-pronto">La grabación estará disponible pronto.</p>') +
+      '</li>';
+  };
+  const ordenadas = [...FORMACIONES].sort((a, b) => b.fecha.localeCompare(a.fecha));
+  $('#v-formaciones').innerHTML =
+    '<h1 class="titulo">Formaciones</h1>' +
+    '<p class="entrada">Si te perdiste alguna sesión o quieres repasarla, aquí están las grabaciones, de la más reciente a la más antigua.</p>' +
+    '<ul class="sesiones">' + ordenadas.map(sesion).join('') + '</ul>';
+}
+
+function pintarTodo() {
+  pintarCalles();
+  pintarMateriales();
+  pintarFormaciones();
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('[data-reintentar]')) return;
+  estado.carga = 'cargando';
+  pintarTodo();
+  cargar();
+});
+
+/* ============================================================
+   Navegación por pestañas (#calles, #materiales, #formaciones)
+   ============================================================ */
+const VISTAS = ['calles', 'materiales', 'formaciones'];
+function mostrarVista() {
+  const pedida = location.hash.slice(1);
+  const actual = VISTAS.includes(pedida) ? pedida : 'calles';
+  VISTAS.forEach(v => { $('#v-' + v).hidden = v !== actual; });
+  document.querySelectorAll('.pestana').forEach(a => {
+    if (a.dataset.vista === actual) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+  });
+  window.scrollTo(0, 0);
+}
+window.addEventListener('hashchange', mostrarVista);
+
+/* ============================================================
+   Arranque
+   ============================================================ */
+// Si ya se abrió antes, se pinta lo último que se vio mientras llega lo nuevo
+(function arrancar() {
+  const previo = guardado.leer('sac:datos', null);
+  if (previo && Array.isArray(previo.calles)) {
+    aplicarDatos(previo);
+    contenidoPintado = JSON.stringify([previo.calles, previo.materiales, previo.formaciones]);
+  }
+  pintarTodo();
+  mostrarVista();
+  cargar();
+  setInterval(refrescar, REFRESCO);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') refrescar(); });
+  window.addEventListener('online', () => { enviar(); refrescar(); });
+})();
+</script>
+</body>
+</html>
