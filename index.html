@@ -231,6 +231,7 @@
   .zona-cab span { color: var(--tinta-2); font-size: .95rem; text-align: right; }
 
   .calles { display: grid; gap: 12px; }
+  #lista > .calles { margin-top: 10px; }
   .calle { background: var(--papel); border-radius: 0; overflow: hidden; }
   .calle-cuerpo { padding: 14px 16px 16px; }
   .tramo-fila { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
@@ -467,6 +468,20 @@
   .placa-nombre, .provincia-nombre, .zona-cab h2, .grupo h2, .fecha b, .tipo { font-weight: 400; text-transform: uppercase; letter-spacing: .01em; }
   .placa-tipo { font-family: var(--cuerpo); font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 3px; }
   .placa-nombre { font-size: 1.9rem; }
+  .placa-municipio {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 8px;
+    font-family: var(--cuerpo);
+    font-size: .8rem;
+    font-weight: 600;
+    line-height: 1.2;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    opacity: .88;
+  }
+  .placa-municipio svg { flex: none; }
 
   .cabecera { background: var(--esmalte); padding: 0; }
   .cabecera .col { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; }
@@ -523,7 +538,7 @@
     height: 4px;
     background: repeating-linear-gradient(90deg, #fff 0 14px, transparent 14px 26px);
   }
-  .contador[data-n="0"] .contador-cifra { max-width: none; padding-right: 14px; }
+  .contador[data-n="0"] .contador-cifra { flex: 1; min-width: 0; max-width: none; padding-right: 14px; }
   .contador[data-n="0"] .calle-escena { display: none; }
   .calle { content-visibility: auto; contain-intrinsic-size: auto 270px; }
 
@@ -623,6 +638,7 @@ const idCalle = c => [c.provincia, c.municipio, c.zona, c.calle, c.tramo].join('
 const idZona = c => c.municipio + '|' + c.zona;
 
 const ICONO = {
+  pin: '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a7.5 7.5 0 0 0-7.5 7.5C4.500 15 12 22 12 22s7.500-7 7.500-12.500A7.500 7.500 0 0 0 12 2zm0 10.200a2.700 2.700 0 1 1 0-5.400 2.700 2.700 0 0 1 0 5.400z"/></svg>',
   lupa: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.8-3.8"/></svg>',
   puerta: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17"/><path d="M3 21h18"/><path d="M14.5 12.5v.5"/></svg>',
   ruta: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4z"/></svg>',
@@ -966,7 +982,7 @@ function pintarProvincia() {
     '<button class="btn-texto" id="cambiar-provincia">Cambiar provincia</button></div>' +
     '<p class="resumen" id="resumen"></p>' +
     '<label class="buscar">' + ICONO.lupa +
-    '<input type="search" id="buscar" placeholder="Busca una calle o una zona" aria-label="Busca una calle o una zona" autocomplete="off" value="' + esc(estado.busqueda) + '"></label>' +
+    '<input type="search" id="buscar" placeholder="Busca una calle o un municipio" aria-label="Busca una calle o un municipio" autocomplete="off" value="' + esc(estado.busqueda) + '"></label>' +
     chips +
     '<div id="lista"></div>' +
     '<p class="pie-nota" id="pie-calles"></p>';
@@ -1004,18 +1020,10 @@ function pintarLista() {
     return;
   }
 
-  const grupos = [];
-  visibles.forEach(c => {
-    let g = grupos.find(x => x.id === idZona(c));
-    if (!g) { g = { id: idZona(c), zona: c.zona, municipio: c.municipio, calles: [] }; grupos.push(g); }
-    g.calles.push(c);
-  });
-
-  $('#lista').innerHTML = grupos.map(g =>
-    '<section class="zona"><div class="zona-cab"><h2>' + esc(g.zona || g.municipio || 'Calles') + '</h2>' +
-    '<span>' + (g.zona && g.municipio ? esc(g.municipio) + ', ' : '') + plural(g.calles.length, 'calle', 'calles') + '</span></div>' +
-    '<ul class="calles">' + g.calles.map(tarjetaCalle).join('') + '</ul></section>'
-  ).join('');
+  // Las calles van seguidas, en el orden del Sheet, sin títulos de sección
+  // El municipio se rotula en la placa solo si la provincia tiene más de uno
+  const conMunicipio = new Set(filas.map(c => c.municipio)).size > 1;
+  $('#lista').innerHTML = '<ul class="calles">' + visibles.map(c => tarjetaCalle(c, conMunicipio)).join('') + '</ul>';
   document.querySelectorAll('#lista .calle').forEach(li =>
     ajustarEscena($('.calle-escena', li), Math.min(cuenta(li.dataset.calle), MAX_MINI), false, false));
 }
@@ -1048,12 +1056,13 @@ function contador(id) {
     '<div class="calle-escena" aria-hidden="true"></div></div>';
 }
 
-function tarjetaCalle(c) {
+function tarjetaCalle(c, conMunicipio) {
   const id = idCalle(c);
   const mapa = 'https://www.google.com/maps/search/?api=1&query=' +
     encodeURIComponent([c.calle, c.municipio, c.provincia].filter(Boolean).join(', '));
   return '<li class="calle" data-calle="' + esc(id) + '">' +
-    '<div class="placa">' + rotulo(c.calle) + '</div>' +
+    '<div class="placa">' + rotulo(c.calle) +
+    (conMunicipio && c.municipio ? '<span class="placa-municipio">' + ICONO.pin + esc(c.municipio) + '</span>' : '') + '</div>' +
     '<div class="calle-cuerpo">' +
     (c.tramo ? '<p class="tramo">' + ICONO.puerta + '<span>' + esc(c.tramo) + '</span></p>' : '') +
     (c.nota ? '<p class="nota-calle' + (c.tramo ? '' : ' nota-calle--sola') + '">' + esc(c.nota) + '</p>' : '') +
