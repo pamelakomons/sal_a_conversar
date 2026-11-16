@@ -570,7 +570,7 @@
   /* El granate queda para la acción y la gente; las placas y la pestaña activa van en negro */
   .placa { background: var(--tinta); color: var(--acera); }
   .placa::after { border-color: currentColor; opacity: .55; }
-  .pestana[aria-current="page"] { background: var(--tinta); color: var(--acera); }
+  .pestana[aria-current="page"] { background: var(--esmalte); color: #fff; }
   .tramo svg { color: var(--tinta-2); }
   .tipo { color: var(--tinta); }
 
@@ -745,8 +745,8 @@ const suma = {
 const guardarPendientes = () => guardado.escribir('sac:pendientes', Object.fromEntries(suma.pendientes));
 
 let enviando = false, relojEnviar, ultimaFirma = '';
-const MAX_MINI = 7;       // caminantes que caben en la tira de una calle
-const MAX_GRANDE = 30;    // caminantes en la escena general
+const MAX_MINI = 20;       // caminantes que caben en la tira de una calle
+const MAX_GRANDE = 200;    // caminantes en la escena general
 
 function recontar() {
   const m = new Map();
@@ -1011,7 +1011,7 @@ function pintarSelector() {
       '<div class="marcador"><span class="marcador-num" id="marcador-num">' + (estreno ? 0 : marcadorPintado) + '</span>' +
       '<span class="marcador-txt" id="marcador-txt"></span></div>' +
       '<div class="escena escena--grande" id="escena-general" aria-hidden="true"></div>' +
-      '<p class="entrada">Elige tu provincia, sal a la calle y suma cada conversación que tengas.</p>' +
+      '<p class="entrada">No hace falta que recopiles datos. Elige tu provincia y cada vez que actives una conversación dale al botón de sumar.</p>' +
       (PROVINCIAS.length > 8 ? '<label class="buscar buscar--provincia">' + ICONO.lupa +
         '<input type="search" id="buscar-provincia" placeholder="Busca tu provincia" aria-label="Busca tu provincia" autocomplete="off" value="' + esc(estado.buscaProvincia) + '"></label>' : '') +
       '<ul class="provincias" id="provincias"></ul>' +
