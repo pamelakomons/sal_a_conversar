@@ -1197,7 +1197,7 @@ function pintarFormaciones() {
   const ordenadas = [...FORMACIONES].sort((a, b) => b.fecha.localeCompare(a.fecha));
   $('#v-formaciones').innerHTML =
     '<h1 class="titulo">Formaciones</h1>' +
-    '<p class="entrada">Si te perdiste alguna sesión o quieres repasarla, aquí están las grabaciones, de la más reciente a la más antigua.</p>' +
+    '<p class="entrada">Si te perdiste alguna sesión o quieres repasarla, aquí están las grabaciones.</p>' +
     '<ul class="sesiones">' + ordenadas.map(sesion).join('') + '</ul>';
 }
 
