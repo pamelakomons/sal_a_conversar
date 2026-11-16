@@ -1164,7 +1164,7 @@ function pintarMateriales() {
   };
   $('#v-materiales').innerHTML =
     '<h1 class="titulo">Materiales</h1>' +
-    '<p class="entrada">Lo que necesitas leer antes de salir y lo que conviene llevar encima. Cada uno se abre directamente.</p>' +
+    '<p class="entrada">Lo que necesitas leer antes de salir. Cada uno se abre directamente.</p>' +
     grupos.map(g => '<div class="grupo"><h2>' + esc(g.nombre) + '</h2><ul class="hoja">' + g.items.map(fila).join('') + '</ul></div>').join('');
 }
 
