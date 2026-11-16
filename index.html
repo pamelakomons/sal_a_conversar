@@ -565,6 +565,56 @@
     100% { transform: translate(0, 0); }
   }
   .chispa { z-index: 2; }
+
+  /* ============ Ajustes de uso y de color ============ */
+  /* El granate queda para la acción y la gente; las placas y la pestaña activa van en negro */
+  .placa { background: var(--tinta); color: var(--acera); }
+  .placa::after { border-color: currentColor; opacity: .55; }
+  .pestana[aria-current="page"] { background: var(--tinta); color: var(--acera); }
+  .tramo svg { color: var(--tinta-2); }
+  .tipo { color: var(--tinta); }
+
+  /* Escena de inicio más baja, para llegar antes a las provincias */
+  .escena--grande { aspect-ratio: 16 / 5; }
+  .buscar--provincia + .provincias { margin-top: 12px; }
+  #sin-provincia { margin-top: 14px; }
+
+  /* Tu última calle, fijada arriba */
+  .seccion { font-family: var(--rotulo); font-weight: 400; font-size: 1.25rem; line-height: 1.1; text-transform: uppercase; letter-spacing: .01em; }
+  #fijada { margin-top: 18px; }
+  .fijada-cab { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
+  #titulo-todas { margin-top: 28px; }
+  #titulo-todas + .buscar { margin-top: 10px; }
+
+  /* Filtro de municipio como desplegable cuando hay muchos */
+  .zona-chip { min-height: 44px; }
+  .desplegable { position: relative; flex: 1; min-width: 0; }
+  .desplegable select {
+    width: 100%;
+    min-height: 48px;
+    padding: 0 44px 0 14px;
+    border: 2px solid var(--tinta);
+    border-radius: 0;
+    background: var(--papel);
+    color: var(--tinta);
+    font: inherit;
+    font-weight: 600;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+  }
+  .desplegable::after {
+    content: "";
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    width: 9px;
+    height: 9px;
+    border-right: 2.5px solid var(--tinta);
+    border-bottom: 2.5px solid var(--tinta);
+    transform: translateY(-70%) rotate(45deg);
+    pointer-events: none;
+  }
 </style>
 </head>
 <body>
@@ -666,10 +716,16 @@ async function pedir(url, opciones) {
 const estado = {
   carga: 'cargando',       // 'cargando' | 'lista' | 'error'
   conexion: true,
-  provincia: guardado.leer('sac:provincia', null),
+  provincia: null,          // la decide la dirección (#valladolid) o, si no dice nada, la última elegida
   municipio: null,          // filtro de la lista: null = todos los municipios
-  busqueda: ''
+  busqueda: '',
+  buscaProvincia: ''
 };
+let rutaResuelta = false;   // si ya se ha decidido qué provincia abrir al entrar
+let municipiosVista = [];   // municipios de la provincia abierta, en el orden del filtro
+
+// «Alicante/Alacant» -> «alicante-alacant»: el nombre de la provincia en la dirección
+const slug = s => norm(s).replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 
 /* El total de cada calle es lo que dice el Sheet más lo que esta persona ha
    sumado y aún no ha llegado: así el número sube al instante al pulsar. */
@@ -753,8 +809,10 @@ async function cargar() {
       ponerTotales(d.conversaciones);
       actualizarTotales();
     } else {
+      const yaHabia = estado.carga === 'lista';
       aplicarDatos(d);
       contenidoPintado = contenido;
+      aplicarRuta(false, yaHabia);
       pintarTodo();
     }
     if (suma.pendientes.size) enviar();
@@ -876,9 +934,9 @@ function caminante(i, grande, entra, retraso) {
   const reparto = (semilla, salto) => { const v = semilla + i * salto; return v - Math.floor(v); };
   const ancho = reparto(0.37, 0.6180339887);
   const fondo = reparto(0.21, 0.7548776662);   // 0 = lejos (arriba, pequeña), 1 = cerca (abajo, grande)
-  const paseo = grande ? [46, 16] : [16, 4];
+  const paseo = grande ? [46, 9] : [16, 4];
   let estilo = grande
-    ? 'left:' + (2 + ancho * 88).toFixed(1) + '%;top:' + (6 + fondo * 56).toFixed(1) + '%;--s:' + (0.8 + fondo * 0.9).toFixed(2) + ';z-index:' + (1 + Math.round(fondo * 50)) + ';'
+    ? 'left:' + (2 + ancho * 88).toFixed(1) + '%;top:' + (4 + fondo * 44).toFixed(1) + '%;--s:' + (0.75 + fondo * 0.7).toFixed(2) + ';z-index:' + (1 + Math.round(fondo * 50)) + ';'
     : 'left:' + (ancho * 80).toFixed(1) + '%;top:' + (8 + fondo * 22).toFixed(1) + '%;--s:' + (0.9 + fondo * 0.2).toFixed(2) + ';';
   estilo += '--t:' + (16 + a(3) * 16).toFixed(1) + 's;--r:-' + (a(4) * 20).toFixed(1) + 's;--p:-' + (a(5) * 0.6).toFixed(2) + 's;';
   [1, 2, 3].forEach(n => {
@@ -938,7 +996,7 @@ function pintarSelector() {
     const n = totalDe(p);
     const sube = !estreno && n > (provinciasPintadas[p] || 0);
     provinciasPintadas[p] = n;
-    return '<li><button class="provincia" data-provincia="' + esc(p) + '">' +
+    return '<li data-nombre="' + esc(p) + '"><button class="provincia" data-provincia="' + esc(p) + '">' +
       '<span><span class="provincia-nombre">' + conCorte(p) + '</span>' +
       '<span class="provincia-dato">' + plural(filas.length, 'calle', 'calles') + ' en ' + plural(zonas, 'zona', 'zonas') + '</span></span>' +
       '<span class="provincia-conv' + (n ? '' : ' provincia-conv--cero') + (sube ? ' bote' : '') + '">' + ICONO.bocadillo +
@@ -954,12 +1012,16 @@ function pintarSelector() {
       '<span class="marcador-txt" id="marcador-txt"></span></div>' +
       '<div class="escena escena--grande" id="escena-general" aria-hidden="true"></div>' +
       '<p class="entrada">Elige tu provincia, sal a la calle y suma cada conversación que tengas.</p>' +
+      (PROVINCIAS.length > 8 ? '<label class="buscar buscar--provincia">' + ICONO.lupa +
+        '<input type="search" id="buscar-provincia" placeholder="Busca tu provincia" aria-label="Busca tu provincia" autocomplete="off" value="' + esc(estado.buscaProvincia) + '"></label>' : '') +
       '<ul class="provincias" id="provincias"></ul>' +
+      '<p class="entrada" id="sin-provincia" hidden></p>' +
       '<p class="pie-nota" id="pie-selector"></p>';
   }
   $('#marcador-txt').textContent = total === 0 ? 'Todavía no hay conversaciones. La primera puede ser tuya.'
     : (total === 1 ? 'conversación' : 'conversaciones') + ' entre todas las provincias';
   $('#provincias').innerHTML = tarjetas;
+  filtrarProvincias();
   $('#pie-selector').textContent = estado.conexion ? '' : AVISO_SIN_RED;
   $('#pie-selector').hidden = estado.conexion;
   ajustarEscena($('#escena-general'), Math.min(total, MAX_GRANDE), true, true);
@@ -967,26 +1029,69 @@ function pintarSelector() {
   marcadorPintado = total;
 }
 
-function pintarProvincia() {
-  // Los filtros de arriba son los municipios de la provincia, en el orden del Sheet
-  const municipios = [...new Set(filasProvincia().map(c => c.municipio))];
-  if (estado.municipio !== null && !municipios.includes(estado.municipio)) estado.municipio = null;
-  const chips = municipios.length < 2 ? '' :
-    '<div class="zonas" role="group" aria-label="Filtrar por municipio">' +
-    '<button class="zona-chip" data-todos aria-pressed="true">Todos</button>' +
-    municipios.map(m => '<button class="zona-chip" data-municipio="' + esc(m) + '" aria-pressed="false">' + esc(m || 'Sin municipio') + '</button>').join('') +
-    '</div>';
+// Deja a la vista solo las provincias que coinciden con lo escrito en el buscador
+function filtrarProvincias() {
+  const q = norm(estado.buscaProvincia.trim());
+  let visibles = 0;
+  document.querySelectorAll('#provincias > li').forEach(li => {
+    const coincide = !q || norm(li.dataset.nombre).includes(q);
+    li.hidden = !coincide;
+    if (coincide) visibles++;
+  });
+  const aviso = $('#sin-provincia');
+  if (!aviso) return;
+  aviso.hidden = visibles > 0;
+  aviso.textContent = visibles ? '' : 'No hay ninguna provincia con «' + estado.buscaProvincia.trim() + '». Prueba con otro nombre.';
+}
 
+function pintarProvincia() {
+  // El filtro de arriba son los municipios de la provincia
+  const delSheet = [...new Set(filasProvincia().map(c => c.municipio))];
+  const nombre = m => m || 'Sin municipio';
+  let filtro = '';
+  if (delSheet.length > 6) {
+    // Muchos municipios: desplegable, por orden alfabético
+    municipiosVista = [...delSheet].sort((a, b) => nombre(a).localeCompare(nombre(b), 'es'));
+    filtro = '<div class="zonas"><div class="desplegable"><select id="municipio" aria-label="Filtrar por municipio">' +
+      '<option value="todos">Todos los municipios</option>' +
+      municipiosVista.map((m, i) => '<option value="' + i + '">' + esc(nombre(m)) + '</option>').join('') +
+      '</select></div></div>';
+  } else {
+    // Pocos: botones en fila, en el orden del Sheet
+    municipiosVista = delSheet;
+    if (delSheet.length > 1) filtro =
+      '<div class="zonas" role="group" aria-label="Filtrar por municipio">' +
+      '<button class="zona-chip" data-todos aria-pressed="true">Todos</button>' +
+      delSheet.map(m => '<button class="zona-chip" data-municipio="' + esc(m) + '" aria-pressed="false">' + esc(nombre(m)) + '</button>').join('') +
+      '</div>';
+  }
+  if (estado.municipio !== null && !municipiosVista.includes(estado.municipio)) estado.municipio = null;
+
+  const fijada = calleFijada();
   $('#v-calles').innerHTML =
     '<div class="donde"><h1 class="titulo">Calles de ' + conCorte(estado.provincia) + '</h1>' +
     '<button class="btn-texto" id="cambiar-provincia">Cambiar provincia</button></div>' +
     '<p class="resumen" id="resumen"></p>' +
+    (fijada ? '<div id="fijada"></div><h2 class="seccion" id="titulo-todas">Todas las calles</h2>' : '') +
     '<label class="buscar">' + ICONO.lupa +
     '<input type="search" id="buscar" placeholder="Busca una calle o un municipio" aria-label="Busca una calle o un municipio" autocomplete="off" value="' + esc(estado.busqueda) + '"></label>' +
-    chips +
+    filtro +
     '<div id="lista"></div>' +
     '<p class="pie-nota" id="pie-calles"></p>';
+  if (fijada) {
+    $('#fijada').innerHTML =
+      '<div class="fijada-cab"><h2 class="seccion">Tu última calle</h2><button class="btn-texto" id="quitar-fijada">Quitar</button></div>' +
+      '<ul class="calles">' + tarjetaCalle(fijada, municipiosVista.length > 1) + '</ul>';
+    ajustarEscena($('#fijada .calle-escena'), Math.min(cuenta(idCalle(fijada)), MAX_MINI), false, false);
+  }
   pintarLista();
+}
+
+// La última calle en la que esta persona sumó, si es de la provincia abierta
+function calleFijada() {
+  const u = guardado.leer('sac:ultima', null);
+  if (!u || u.provincia !== estado.provincia) return null;
+  return filasProvincia().find(c => idCalle(c) === u.id) || null;
 }
 
 function pintarResumen(conBote) {
@@ -1007,6 +1112,8 @@ function pintarLista() {
 
   document.querySelectorAll('.zona-chip').forEach(b => b.setAttribute('aria-pressed',
     String(b.hasAttribute('data-todos') ? estado.municipio === null : b.dataset.municipio === estado.municipio)));
+  const desplegable = $('#municipio');
+  if (desplegable) desplegable.value = estado.municipio === null ? 'todos' : String(municipiosVista.indexOf(estado.municipio));
 
   const q = norm(estado.busqueda.trim());
   const visibles = filas.filter(c =>
@@ -1022,7 +1129,7 @@ function pintarLista() {
 
   // Las calles van seguidas, en el orden del Sheet, sin títulos de sección
   // El municipio se rotula en la placa solo si la provincia tiene más de uno
-  const conMunicipio = new Set(filas.map(c => c.municipio)).size > 1;
+  const conMunicipio = municipiosVista.length > 1;
   $('#lista').innerHTML = '<ul class="calles">' + visibles.map(c => tarjetaCalle(c, conMunicipio)).join('') + '</ul>';
   document.querySelectorAll('#lista .calle').forEach(li =>
     ajustarEscena($('.calle-escena', li), Math.min(cuenta(li.dataset.calle), MAX_MINI), false, false));
@@ -1033,7 +1140,7 @@ function actualizarCifras() {
   if (!estado.provincia || !$('#lista')) return;
   ultimaFirma = firma();
   let cambios = false;
-  document.querySelectorAll('#lista .calle').forEach(li => {
+  document.querySelectorAll('#v-calles .calle').forEach(li => {
     const n = cuenta(li.dataset.calle);
     const caja = $('.contador', li);
     if (Number(caja.dataset.n) === n) return;
@@ -1112,19 +1219,21 @@ function chispas(tarjeta) {
 $('#v-calles').addEventListener('click', e => {
   const prov = e.target.closest('[data-provincia]');
   if (prov) {
-    estado.provincia = prov.dataset.provincia;
-    estado.municipio = null;
-    estado.busqueda = '';
-    guardado.escribir('sac:provincia', estado.provincia);
-    pintarCalles();
-    window.scrollTo(0, 0);
+    // La provincia va en la dirección: así se puede compartir el enlace y funciona el botón atrás
+    const destino = '#' + slug(prov.dataset.provincia);
+    if (location.hash === destino) aplicarRuta(true); else location.hash = destino;
     return;
   }
   if (e.target.closest('#cambiar-provincia')) {
-    estado.provincia = null;
     guardado.escribir('sac:provincia', null);
-    pintarCalles();
-    window.scrollTo(0, 0);
+    if (location.hash === '#calles') aplicarRuta(true); else location.hash = '#calles';
+    return;
+  }
+  if (e.target.closest('#quitar-fijada')) {
+    guardado.escribir('sac:ultima', null);
+    const fijada = $('#fijada'), titulo = $('#titulo-todas');
+    if (fijada) fijada.remove();
+    if (titulo) titulo.remove();
     return;
   }
   const chip = e.target.closest('.zona-chip');
@@ -1145,6 +1254,7 @@ $('#v-calles').addEventListener('click', e => {
     const id = boton.dataset.sumar;
     suma.pendientes.set(id, (suma.pendientes.get(id) || 0) + 1);
     guardarPendientes();
+    guardado.escribir('sac:ultima', { provincia: estado.provincia, id: id });   // la próxima vez saldrá arriba
     recontar();
     actualizarCifras();
     chispas(boton.closest('.calle'));
@@ -1153,6 +1263,13 @@ $('#v-calles').addEventListener('click', e => {
 });
 $('#v-calles').addEventListener('input', e => {
   if (e.target.id === 'buscar') { estado.busqueda = e.target.value; pintarLista(); }
+  if (e.target.id === 'buscar-provincia') { estado.buscaProvincia = e.target.value; filtrarProvincias(); }
+});
+$('#v-calles').addEventListener('change', e => {
+  if (e.target.id !== 'municipio') return;
+  const elegido = municipiosVista[Number(e.target.value)];
+  estado.municipio = e.target.value === 'todos' || elegido === undefined ? null : elegido;
+  pintarLista();
 });
 
 /* ============================================================
@@ -1234,16 +1351,47 @@ document.addEventListener('click', e => {
    Navegación por pestañas (#calles, #materiales, #formaciones)
    ============================================================ */
 const VISTAS = ['calles', 'materiales', 'formaciones'];
-function mostrarVista() {
-  const pedida = location.hash.slice(1);
-  const actual = VISTAS.includes(pedida) ? pedida : 'calles';
+const TITULOS = { materiales: 'Materiales · ', formaciones: 'Formaciones · ' };
+
+function mostrarVista(actual, sinSubir) {
   VISTAS.forEach(v => { $('#v-' + v).hidden = v !== actual; });
   document.querySelectorAll('.pestana').forEach(a => {
     if (a.dataset.vista === actual) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
   });
-  window.scrollTo(0, 0);
+  // La pestaña Calles vuelve a la provincia abierta, no a la lista de provincias
+  $('.pestana[data-vista="calles"]').setAttribute('href', estado.provincia ? '#' + slug(estado.provincia) : '#calles');
+  document.title = (actual === 'calles' ? (estado.provincia ? 'Calles de ' + estado.provincia + ' · ' : '') : TITULOS[actual]) + 'Sal a conversar';
+  if (!sinSubir) window.scrollTo(0, 0);
 }
-window.addEventListener('hashchange', mostrarVista);
+
+/* La dirección manda: #materiales y #formaciones son pestañas, #calles es la lista de
+   provincias y #valladolid abre esa provincia. Así cada provincia tiene su enlace para
+   compartir y el botón atrás del móvil vuelve a la lista en vez de salir de la web. */
+function aplicarRuta(pintar, sinSubir) {
+  let h = '';
+  try { h = decodeURIComponent(location.hash.slice(1)); } catch (e) { h = ''; }
+  const vista = h === 'materiales' || h === 'formaciones' ? h : 'calles';
+  if (vista === 'calles' && estado.carga === 'lista') {
+    let nueva = h && h !== 'calles' ? (PROVINCIAS.find(p => slug(p) === slug(h)) || null) : null;
+    if (!nueva && !rutaResuelta && (!h || h === 'calles')) {
+      // Al entrar sin provincia en la dirección, se abre la última que eligió esta persona
+      const recordada = guardado.leer('sac:provincia', null);
+      if (PROVINCIAS.includes(recordada)) nueva = recordada;
+    }
+    rutaResuelta = true;
+    const destino = nueva ? '#' + slug(nueva) : '#calles';
+    if (location.hash !== destino) { try { history.replaceState(null, '', destino); } catch (e) { /* sigue igual */ } }
+    if (nueva !== estado.provincia) {
+      estado.provincia = nueva;
+      estado.municipio = null;
+      estado.busqueda = '';
+      if (nueva) guardado.escribir('sac:provincia', nueva);
+      if (pintar) pintarCalles();
+    }
+  }
+  mostrarVista(vista, sinSubir);
+}
+window.addEventListener('hashchange', () => aplicarRuta(true));
 
 /* ============================================================
    Arranque
@@ -1255,8 +1403,8 @@ window.addEventListener('hashchange', mostrarVista);
     aplicarDatos(previo);
     contenidoPintado = JSON.stringify([previo.calles, previo.materiales, previo.formaciones]);
   }
+  aplicarRuta(false);
   pintarTodo();
-  mostrarVista();
   cargar();
   setInterval(refrescar, REFRESCO);
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') refrescar(); });
