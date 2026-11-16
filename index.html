@@ -110,7 +110,11 @@
 
   /* Provincias */
   .provincias { display: grid; gap: 10px; margin-top: 20px; }
-  @media (min-width: 440px) { .provincias { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 440px) { .provincias { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .provincias li { display: flex; }
+  .provincia > span:first-child { min-width: 0; }
+  .provincia-nombre, .titulo { overflow-wrap: anywhere; }
+  .donde .titulo { min-width: 0; }
   .provincia {
     width: 100%;
     display: flex;
@@ -879,6 +883,9 @@ function ajustarEscena(el, n, grande, entra) {
   if (html) el.insertAdjacentHTML('beforeend', html);
 }
 
+// Los nombres dobles («Alicante/Alacant») pueden partirse justo después de la barra
+const conCorte = s => esc(s).replace(/\//g, '/<wbr>');
+
 const AVISO_SIN_RED = 'Sin conexión: los totales pueden no estar al día. Lo que sumes se enviará cuando vuelva.';
 
 // Lo que se ve mientras llegan los datos, o si no llegan
@@ -916,7 +923,7 @@ function pintarSelector() {
     const sube = !estreno && n > (provinciasPintadas[p] || 0);
     provinciasPintadas[p] = n;
     return '<li><button class="provincia" data-provincia="' + esc(p) + '">' +
-      '<span><span class="provincia-nombre">' + esc(p) + '</span>' +
+      '<span><span class="provincia-nombre">' + conCorte(p) + '</span>' +
       '<span class="provincia-dato">' + plural(filas.length, 'calle', 'calles') + ' en ' + plural(zonas, 'zona', 'zonas') + '</span></span>' +
       '<span class="provincia-conv' + (n ? '' : ' provincia-conv--cero') + (sube ? ' bote' : '') + '">' + ICONO.bocadillo +
       n + '<span class="oculto"> ' + (n === 1 ? 'conversación' : 'conversaciones') + '</span>' +
@@ -955,7 +962,7 @@ function pintarProvincia() {
     '</div>';
 
   $('#v-calles').innerHTML =
-    '<div class="donde"><h1 class="titulo">Calles de ' + esc(estado.provincia) + '</h1>' +
+    '<div class="donde"><h1 class="titulo">Calles de ' + conCorte(estado.provincia) + '</h1>' +
     '<button class="btn-texto" id="cambiar-provincia">Cambiar provincia</button></div>' +
     '<p class="resumen" id="resumen"></p>' +
     '<label class="buscar">' + ICONO.lupa +
