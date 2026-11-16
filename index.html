@@ -647,7 +647,7 @@ const estado = {
   carga: 'cargando',       // 'cargando' | 'lista' | 'error'
   conexion: true,
   provincia: guardado.leer('sac:provincia', null),
-  zona: 'todas',
+  municipio: null,          // filtro de la lista: null = todos los municipios
   busqueda: ''
 };
 
@@ -945,18 +945,13 @@ function pintarSelector() {
 }
 
 function pintarProvincia() {
-  const filas = filasProvincia();
-  const zonas = [];
-  filas.forEach(c => {
-    if (!zonas.some(z => z.id === idZona(c))) zonas.push({ id: idZona(c), nombre: c.zona || c.municipio || 'Calles', municipio: c.municipio });
-  });
-  const repetidas = zonas.filter((z, i) => zonas.some((o, j) => j !== i && o.nombre === z.nombre)).map(z => z.id);
-  const etiqueta = z => z.nombre + (z.municipio && z.municipio !== z.nombre &&
-    (repetidas.includes(z.id) || z.municipio !== estado.provincia) ? ' (' + z.municipio + ')' : '');
-  const chips = zonas.length < 2 ? '' :
-    '<div class="zonas" role="group" aria-label="Filtrar por zona">' +
-    '<button class="zona-chip" data-zona="todas" aria-pressed="true">Todas</button>' +
-    zonas.map(z => '<button class="zona-chip" data-zona="' + esc(z.id) + '" aria-pressed="false">' + esc(etiqueta(z)) + '</button>').join('') +
+  // Los filtros de arriba son los municipios de la provincia, en el orden del Sheet
+  const municipios = [...new Set(filasProvincia().map(c => c.municipio))];
+  if (estado.municipio !== null && !municipios.includes(estado.municipio)) estado.municipio = null;
+  const chips = municipios.length < 2 ? '' :
+    '<div class="zonas" role="group" aria-label="Filtrar por municipio">' +
+    '<button class="zona-chip" data-todos aria-pressed="true">Todos</button>' +
+    municipios.map(m => '<button class="zona-chip" data-municipio="' + esc(m) + '" aria-pressed="false">' + esc(m || 'Sin municipio') + '</button>').join('') +
     '</div>';
 
   $('#v-calles').innerHTML =
@@ -987,16 +982,17 @@ function pintarLista() {
   const filas = filasProvincia();
   pintarResumen(false);
 
-  document.querySelectorAll('.zona-chip').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.zona === estado.zona)));
+  document.querySelectorAll('.zona-chip').forEach(b => b.setAttribute('aria-pressed',
+    String(b.hasAttribute('data-todos') ? estado.municipio === null : b.dataset.municipio === estado.municipio)));
 
   const q = norm(estado.busqueda.trim());
   const visibles = filas.filter(c =>
-    (estado.zona === 'todas' || idZona(c) === estado.zona) &&
+    (estado.municipio === null || c.municipio === estado.municipio) &&
     (!q || norm(c.calle + ' ' + c.zona + ' ' + c.municipio).includes(q)));
 
   if (!visibles.length) {
     $('#lista').innerHTML = '<div class="vacio"><p>No hay ninguna calle con «' + esc(estado.busqueda.trim()) +
-      '»' + (estado.zona === 'todas' ? '' : ' en esta zona') + '. Prueba con otro nombre o mira todas las calles.</p>' +
+      '»' + (estado.municipio === null ? '' : ' en este municipio') + '. Prueba con otro nombre o mira todas las calles.</p>' +
       '<button class="btn btn--borde" id="ver-todas">Ver todas las calles</button></div>';
     return;
   }
@@ -1101,7 +1097,7 @@ $('#v-calles').addEventListener('click', e => {
   const prov = e.target.closest('[data-provincia]');
   if (prov) {
     estado.provincia = prov.dataset.provincia;
-    estado.zona = 'todas';
+    estado.municipio = null;
     estado.busqueda = '';
     guardado.escribir('sac:provincia', estado.provincia);
     pintarCalles();
@@ -1115,10 +1111,14 @@ $('#v-calles').addEventListener('click', e => {
     window.scrollTo(0, 0);
     return;
   }
-  const chip = e.target.closest('[data-zona]');
-  if (chip) { estado.zona = chip.dataset.zona; pintarLista(); return; }
+  const chip = e.target.closest('.zona-chip');
+  if (chip) {
+    estado.municipio = chip.hasAttribute('data-todos') ? null : chip.dataset.municipio;
+    pintarLista();
+    return;
+  }
   if (e.target.closest('#ver-todas')) {
-    estado.zona = 'todas';
+    estado.municipio = null;
     estado.busqueda = '';
     $('#buscar').value = '';
     pintarLista();
