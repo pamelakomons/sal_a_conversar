@@ -725,8 +725,8 @@ const suma = {
 const guardarPendientes = () => guardado.escribir('sac:pendientes', Object.fromEntries(suma.pendientes));
 
 let enviando = false, relojEnviar, ultimaFirma = '';
-const MAX_MINI = 7;       // caminantes que caben en la tira de una calle
-const MAX_GRANDE = 30;    // caminantes en la escena general
+const MAX_MINI = 30;       // caminantes que caben en la tira de una calle
+const MAX_GRANDE = 200;    // caminantes en la escena general
 
 function recontar() {
   const m = new Map();
