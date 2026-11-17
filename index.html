@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Sal a conversar</title>
-<meta name="description" content="Calles, materiales y formaciones para quienes salen a conversar.">
+<meta name="description" content="Calles y materiales para quienes salen a conversar.">
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#7B072A">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚪</text></svg>">
@@ -383,21 +383,6 @@
   .pronto { flex: none; font-size: .85rem; color: var(--tinta-2); border: 1.5px solid var(--linea); border-radius: 0; padding: 2px 10px; }
   .tipo { overflow: hidden; }
   .nota-calle--sola { padding-left: 0; margin-top: 0; }
-  .sesion-pronto { margin-top: 12px; }
-
-  /* Formaciones */
-  .sesiones { display: grid; gap: 12px; margin-top: 20px; }
-  .sesion { background: var(--papel); border-radius: 0; padding: 16px; }
-  .sesion-cab { display: flex; gap: 14px; align-items: flex-start; }
-  .fecha { flex: none; width: 56px; padding: 7px 0 6px; border-radius: 0; background: var(--acera); text-align: center; }
-  .fecha b { display: block; font-family: var(--rotulo); font-weight: 600; font-size: 1.7rem; line-height: 1; }
-  .fecha span { display: block; font-size: .85rem; color: var(--tinta-2); margin-top: 1px; }
-  .sesion h2 { font-size: 1.1rem; font-weight: 600; line-height: 1.25; }
-  .sesion-desc { color: var(--tinta-2); font-size: .95rem; margin-top: 3px; }
-  .sesion-dur { color: var(--tinta-2); font-size: .9rem; margin-top: 4px; }
-  .sesion .acciones { margin-top: 14px; }
-  .sesion .acciones.una { grid-template-columns: 1fr; }
-  .sesion .btn { font-size: .95rem; padding: 0 8px; }
 
   /* Pestañas */
   .pestanas {
@@ -465,7 +450,7 @@
   body { font-synthesis: none; }
   body::before { background: var(--esmalte); }
   .titulo { font-size: 2.5rem; line-height: 1; text-transform: uppercase; font-weight: 400; letter-spacing: .01em; }
-  .placa-nombre, .provincia-nombre, .zona-cab h2, .grupo h2, .fecha b, .tipo { font-weight: 400; text-transform: uppercase; letter-spacing: .01em; }
+  .placa-nombre, .provincia-nombre, .zona-cab h2, .grupo h2, .tipo { font-weight: 400; text-transform: uppercase; letter-spacing: .01em; }
   .placa-tipo { font-family: var(--cuerpo); font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 3px; }
   .placa-nombre { font-size: 1.9rem; }
   .placa-municipio {
@@ -567,7 +552,7 @@
   .chispa { z-index: 2; }
 
   /* ============ Ajustes de uso y de color ============ */
-  /* El granate queda para la acción y la gente; las placas y la pestaña activa van en negro */
+  /* El granate queda para la acción, la gente y la pestaña activa; las placas van en negro */
   .placa { background: var(--tinta); color: var(--acera); }
   .placa::after { border-color: currentColor; opacity: .55; }
   .pestana[aria-current="page"] { background: var(--esmalte); color: #fff; }
@@ -629,7 +614,6 @@
 <main class="col">
   <section class="vista" id="v-calles" aria-label="Calles"></section>
   <section class="vista" id="v-materiales" aria-label="Materiales" hidden></section>
-  <section class="vista" id="v-formaciones" aria-label="Formaciones" hidden></section>
 </main>
 
 <nav class="pestanas" aria-label="Secciones">
@@ -642,17 +626,13 @@
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 12h6M9 16h6"/></svg>
       Materiales
     </a>
-    <a class="pestana" href="#formaciones" data-vista="formaciones">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9.5v5l4.5-2.5z"/></svg>
-      Formaciones
-    </a>
   </div>
 </nav>
 
 <script>
 /* ============================================================
    SAL A CONVERSAR
-   Los datos (calles, materiales, formaciones) y el contador de
+   Los datos (calles y materiales) y el contador de
    conversaciones viven en el Google Sheet. Esta página los pide al
    Apps Script publicado como aplicación web.
    ============================================================ */
@@ -660,7 +640,7 @@ const API = 'https://script.google.com/macros/s/AKfycbwKw-ePZ7au3QTooiBc2gelvk4J
 const REFRESCO = 25000;       // cada cuánto se actualizan los totales (ms)
 const MAX_POR_ENVIO = 50;     // el mismo tope que tiene el Apps Script
 
-let CALLES = [], MATERIALES = [], FORMACIONES = [], PROVINCIAS = [];
+let CALLES = [], MATERIALES = [], PROVINCIAS = [];
 
 /* ============================================================
    Utilidades
@@ -745,8 +725,8 @@ const suma = {
 const guardarPendientes = () => guardado.escribir('sac:pendientes', Object.fromEntries(suma.pendientes));
 
 let enviando = false, relojEnviar, ultimaFirma = '';
-const MAX_MINI = 20;       // caminantes que caben en la tira de una calle
-const MAX_GRANDE = 200;    // caminantes en la escena general
+const MAX_MINI = 7;       // caminantes que caben en la tira de una calle
+const MAX_GRANDE = 30;    // caminantes en la escena general
 
 function recontar() {
   const m = new Map();
@@ -788,9 +768,6 @@ function aplicarDatos(d) {
   MATERIALES = (Array.isArray(d.materiales) ? d.materiales : [])
     .map(m => ({ grupo: texto(m.grupo) || 'Materiales', titulo: texto(m.titulo), descripcion: texto(m.descripcion), tipo: texto(m.tipo) || 'Doc', enlace: enlaceSeguro(m.enlace) }))
     .filter(m => m.titulo);
-  FORMACIONES = (Array.isArray(d.formaciones) ? d.formaciones : [])
-    .map(f => ({ titulo: texto(f.titulo), fecha: texto(f.fecha), duracion: texto(f.duracion), descripcion: texto(f.descripcion), video: enlaceSeguro(f.video), presentacion: enlaceSeguro(f.presentacion) }))
-    .filter(f => f.titulo);
   PROVINCIAS = [...new Set(CALLES.map(c => c.provincia))].sort((a, b) => a.localeCompare(b, 'es'));
   if (!PROVINCIAS.includes(estado.provincia)) estado.provincia = null;
   ponerTotales(d.conversaciones);
@@ -801,9 +778,9 @@ async function cargar() {
   try {
     const d = await pedir(API + '?accion=datos');
     if (!d || !d.ok) throw new Error((d && d.error) || 'respuesta');
-    const contenido = JSON.stringify([d.calles, d.materiales, d.formaciones]);
+    const contenido = JSON.stringify([d.calles, d.materiales]);
     const mismoContenido = estado.carga === 'lista' && contenido === contenidoPintado;
-    guardado.escribir('sac:datos', { calles: d.calles, materiales: d.materiales, formaciones: d.formaciones, conversaciones: d.conversaciones });
+    guardado.escribir('sac:datos', { calles: d.calles, materiales: d.materiales, conversaciones: d.conversaciones });
     estado.conexion = true;
     if (mismoContenido) {
       ponerTotales(d.conversaciones);
@@ -1011,7 +988,7 @@ function pintarSelector() {
       '<div class="marcador"><span class="marcador-num" id="marcador-num">' + (estreno ? 0 : marcadorPintado) + '</span>' +
       '<span class="marcador-txt" id="marcador-txt"></span></div>' +
       '<div class="escena escena--grande" id="escena-general" aria-hidden="true"></div>' +
-      '<p class="entrada">No hace falta que recopiles datos. Elige tu provincia y cada vez que actives una conversación, dale al botón de sumar.</p>' +
+      '<p class="entrada">Elige tu provincia, sal a la calle y suma cada conversación que tengas.</p>' +
       (PROVINCIAS.length > 8 ? '<label class="buscar buscar--provincia">' + ICONO.lupa +
         '<input type="search" id="buscar-provincia" placeholder="Busca tu provincia" aria-label="Busca tu provincia" autocomplete="off" value="' + esc(estado.buscaProvincia) + '"></label>' : '') +
       '<ul class="provincias" id="provincias"></ul>' +
@@ -1301,43 +1278,9 @@ function pintarMateriales() {
     grupos.map(g => '<div class="grupo"><h2>' + esc(g.nombre) + '</h2><ul class="hoja">' + g.items.map(fila).join('') + '</ul></div>').join('');
 }
 
-/* ============================================================
-   Formaciones
-   ============================================================ */
-const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-function pintarFormaciones() {
-  if (estado.carga !== 'lista') { $('#v-formaciones').innerHTML = avisoCarga('Formaciones', 'las formaciones'); return; }
-  if (!FORMACIONES.length) {
-    $('#v-formaciones').innerHTML = '<h1 class="titulo">Formaciones</h1><p class="entrada">Todavía no hay formaciones grabadas.</p>';
-    return;
-  }
-  const boton = (url, etiqueta, clase) => '<a class="btn ' + clase + '" href="' + esc(url) + '" target="_blank" rel="noopener">' + etiqueta + '</a>';
-  const sesion = f => {
-    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(f.fecha);
-    const hoja = m && MESES[Number(m[2]) - 1]
-      ? '<div class="fecha"><b>' + Number(m[3]) + '</b><span>' + MESES[Number(m[2]) - 1] + '</span></div>' : '';
-    const detalle = [!hoja && f.fecha ? f.fecha : '', f.duracion ? 'Dura ' + f.duracion : ''].filter(Boolean).join(', ');
-    const botones = (f.video ? boton(f.video, 'Ver grabación', 'btn--ir') : '') +
-      (f.presentacion ? boton(f.presentacion, 'Ver presentación', 'btn--borde') : '');
-    return '<li class="sesion"><div class="sesion-cab">' + hoja +
-      '<div><h2>' + esc(f.titulo) + '</h2>' +
-      (f.descripcion ? '<p class="sesion-desc">' + esc(f.descripcion) + '</p>' : '') +
-      (detalle ? '<p class="sesion-dur">' + esc(detalle) + '</p>' : '') + '</div></div>' +
-      (botones ? '<div class="acciones' + (f.video && f.presentacion ? '' : ' una') + '">' + botones + '</div>'
-        : '<p class="sesion-dur sesion-pronto">La grabación estará disponible pronto.</p>') +
-      '</li>';
-  };
-  const ordenadas = [...FORMACIONES].sort((a, b) => b.fecha.localeCompare(a.fecha));
-  $('#v-formaciones').innerHTML =
-    '<h1 class="titulo">Formaciones</h1>' +
-    '<p class="entrada">Si te perdiste alguna sesión o quieres repasarla, aquí están las grabaciones.</p>' +
-    '<ul class="sesiones">' + ordenadas.map(sesion).join('') + '</ul>';
-}
-
 function pintarTodo() {
   pintarCalles();
   pintarMateriales();
-  pintarFormaciones();
 }
 
 document.addEventListener('click', e => {
@@ -1348,10 +1291,10 @@ document.addEventListener('click', e => {
 });
 
 /* ============================================================
-   Navegación por pestañas (#calles, #materiales, #formaciones)
+   Navegación por pestañas (#calles, #materiales)
    ============================================================ */
-const VISTAS = ['calles', 'materiales', 'formaciones'];
-const TITULOS = { materiales: 'Materiales · ', formaciones: 'Formaciones · ' };
+const VISTAS = ['calles', 'materiales'];
+const TITULOS = { materiales: 'Materiales · ' };
 
 function mostrarVista(actual, sinSubir) {
   VISTAS.forEach(v => { $('#v-' + v).hidden = v !== actual; });
@@ -1364,13 +1307,13 @@ function mostrarVista(actual, sinSubir) {
   if (!sinSubir) window.scrollTo(0, 0);
 }
 
-/* La dirección manda: #materiales y #formaciones son pestañas, #calles es la lista de
+/* La dirección manda: #materiales es una pestaña, #calles es la lista de
    provincias y #valladolid abre esa provincia. Así cada provincia tiene su enlace para
    compartir y el botón atrás del móvil vuelve a la lista en vez de salir de la web. */
 function aplicarRuta(pintar, sinSubir) {
   let h = '';
   try { h = decodeURIComponent(location.hash.slice(1)); } catch (e) { h = ''; }
-  const vista = h === 'materiales' || h === 'formaciones' ? h : 'calles';
+  const vista = h === 'materiales' ? h : 'calles';
   if (vista === 'calles' && estado.carga === 'lista') {
     let nueva = h && h !== 'calles' ? (PROVINCIAS.find(p => slug(p) === slug(h)) || null) : null;
     if (!nueva && !rutaResuelta && (!h || h === 'calles')) {
@@ -1401,7 +1344,7 @@ window.addEventListener('hashchange', () => aplicarRuta(true));
   const previo = guardado.leer('sac:datos', null);
   if (previo && Array.isArray(previo.calles)) {
     aplicarDatos(previo);
-    contenidoPintado = JSON.stringify([previo.calles, previo.materiales, previo.formaciones]);
+    contenidoPintado = JSON.stringify([previo.calles, previo.materiales]);
   }
   aplicarRuta(false);
   pintarTodo();
