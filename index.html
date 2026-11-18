@@ -335,6 +335,7 @@
 
   /* Materiales */
   .grupo { margin-top: 26px; }
+  #v-materiales .zonas + div > .grupo:first-child { margin-top: 12px; }
   .grupo h2 { margin-bottom: 10px; }
   .hoja { overflow: hidden; }
   .hoja li + li { border-top: 1px solid var(--panel-borde); }
@@ -498,7 +499,8 @@ const estado = {
   provincia: null,          // la decide la dirección (#valladolid) o, si no dice nada, la última elegida
   municipio: null,          // filtro de la lista: null = todos los municipios
   busqueda: '',
-  buscaProvincia: ''
+  buscaProvincia: '',
+  idioma: null              // idioma elegido en Materiales
 };
 let rutaResuelta = false;   // si ya se ha decidido qué provincia abrir al entrar
 let municipiosVista = [];   // municipios de la provincia abierta, en el orden del filtro
@@ -565,7 +567,7 @@ function aplicarDatos(d) {
     .map(c => ({ provincia: texto(c.provincia), municipio: texto(c.municipio), zona: texto(c.zona), calle: texto(c.calle), tramo: texto(c.tramo), nota: texto(c.nota) }))
     .filter(c => c.provincia && c.calle);
   MATERIALES = (Array.isArray(d.materiales) ? d.materiales : [])
-    .map(m => ({ grupo: texto(m.grupo) || 'Materiales', titulo: texto(m.titulo), descripcion: texto(m.descripcion), tipo: texto(m.tipo) || 'Doc', enlace: enlaceSeguro(m.enlace) }))
+    .map(m => ({ grupo: texto(m.grupo) || 'Materiales', titulo: texto(m.titulo), descripcion: texto(m.descripcion), tipo: texto(m.tipo) || 'Doc', enlace: enlaceSeguro(m.enlace), idioma: idiomaDe(m.idioma) }))
     .filter(m => m.titulo);
   PROVINCIAS = [...new Set(CALLES.map(c => c.provincia))].sort((a, b) => a.localeCompare(b, 'es'));
   if (!PROVINCIAS.includes(estado.provincia)) estado.provincia = null;
@@ -1061,31 +1063,84 @@ $('#v-calles').addEventListener('change', e => {
 /* ============================================================
    Materiales
    ============================================================ */
+/* Idiomas de los materiales. En el Sheet, la columna «idioma» de la pestaña Materiales
+   admite el nombre o el código (Català, catalan, ca…). Una celda vacía cuenta como
+   castellano. Un idioma que no esté en esta lista también vale: sale tal cual se escriba. */
+const IDIOMAS = [
+  { nombre: 'Castellano', lang: 'es', alias: ['', 'es', 'cas', 'castellano', 'castella', 'espanol', 'spanish'] },
+  { nombre: 'Català', lang: 'ca', alias: ['ca', 'cat', 'catala', 'catalan'] },
+  { nombre: 'Valencià', lang: 'ca', alias: ['val', 'valencia', 'valenciano'] },
+  { nombre: 'Euskara', lang: 'eu', alias: ['eu', 'eus', 'euskara', 'euskera', 'vasco'] },
+  { nombre: 'Galego', lang: 'gl', alias: ['gl', 'gal', 'galego', 'gallego'] }
+];
+function idiomaDe(valor) {
+  const escrito = texto(valor);
+  const conocido = IDIOMAS.find(i => i.alias.includes(norm(escrito)));
+  return conocido ? conocido.nombre : escrito;
+}
+function langDe(nombre) {
+  const conocido = IDIOMAS.find(i => i.nombre === nombre);
+  return conocido ? conocido.lang : '';
+}
+
 function pintarMateriales() {
   if (estado.carga !== 'lista') { $('#v-materiales').innerHTML = avisoCarga('Materiales', 'los materiales'); return; }
   if (!MATERIALES.length) {
     $('#v-materiales').innerHTML = cartel('Materiales') + '<p class="entrada">Todavía no hay materiales publicados.</p>';
     return;
   }
+
+  // Los idiomas salen solos de lo que haya en el Sheet: castellano primero y el resto en su orden
+  const idiomas = [...new Set(MATERIALES.map(m => m.idioma))]
+    .sort((a, b) => (a === 'Castellano' ? -1 : b === 'Castellano' ? 1 : 0));
+  if (!idiomas.includes(estado.idioma)) {
+    // Primero el que eligió esta persona; si no, el de su móvil; si no, castellano
+    const elegido = guardado.leer('sac:idioma', null);
+    const delMovil = (navigator.language || '').slice(0, 2).toLowerCase();
+    estado.idioma = idiomas.includes(elegido) ? elegido
+      : idiomas.find(n => langDe(n) === delMovil) || (idiomas.includes('Castellano') ? 'Castellano' : idiomas[0]);
+  }
+  const selector = idiomas.length < 2 ? '' :
+    '<div class="zonas" role="group" aria-label="Idioma de los materiales">' +
+    idiomas.map(n => '<button class="zona-chip" data-idioma="' + esc(n) + '" aria-pressed="' + (n === estado.idioma) + '"' +
+      (langDe(n) ? ' lang="' + langDe(n) + '"' : '') + '>' + esc(n) + '</button>').join('') +
+    '</div>';
+
   const grupos = [];
-  MATERIALES.forEach(m => {
+  MATERIALES.filter(m => m.idioma === estado.idioma).forEach(m => {
     let g = grupos.find(x => x.nombre === m.grupo);
     if (!g) { g = { nombre: m.grupo, items: [] }; grupos.push(g); }
     g.items.push(m);
   });
+  // La etiqueta de «todavía sin enlace», en el idioma elegido
+  const pronto = { ca: 'Aviat', eu: 'Laster' }[langDe(estado.idioma)] || 'Pronto';
   const fila = m => {
     const dentro = '<span class="tipo">' + esc(m.tipo) + '</span>' +
       '<span class="fila-texto"><span class="fila-titulo">' + esc(m.titulo) + '</span>' +
       (m.descripcion ? '<span class="fila-desc">' + esc(m.descripcion) + '</span>' : '') + '</span>';
     return m.enlace
       ? '<li><a class="fila" href="' + esc(m.enlace) + '" target="_blank" rel="noopener">' + dentro + '<span class="fila-flecha" aria-hidden="true">→</span></a></li>'
-      : '<li><div class="fila fila--sin">' + dentro + '<span class="pronto">Pronto</span></div></li>';
+      : '<li><div class="fila fila--sin">' + dentro + '<span class="pronto">' + pronto + '</span></div></li>';
   };
   $('#v-materiales').innerHTML =
     cartel('Materiales') +
     '<p class="entrada">Lo que necesitas leer antes de salir. Cada uno se abre directamente.</p>' +
-    grupos.map(g => '<div class="grupo"><h2>' + esc(g.nombre) + '</h2><ul class="hoja">' + g.items.map(fila).join('') + '</ul></div>').join('');
+    selector +
+    '<div' + (langDe(estado.idioma) ? ' lang="' + langDe(estado.idioma) + '"' : '') + '>' +
+    grupos.map(g => '<div class="grupo"><h2>' + esc(g.nombre) + '</h2><ul class="hoja">' + g.items.map(fila).join('') + '</ul></div>').join('') +
+    '</div>';
 }
+
+// Cambiar de idioma en Materiales: se recuerda para la próxima vez
+$('#v-materiales').addEventListener('click', e => {
+  const boton = e.target.closest('[data-idioma]');
+  if (!boton) return;
+  estado.idioma = boton.dataset.idioma;
+  guardado.escribir('sac:idioma', estado.idioma);
+  pintarMateriales();
+  const activo = $('#v-materiales [data-idioma][aria-pressed="true"]');
+  if (activo) activo.focus({ preventScroll: true });
+});
 
 function pintarTodo() {
   pintarCalles();
