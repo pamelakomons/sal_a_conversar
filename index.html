@@ -410,6 +410,45 @@
   .bote { animation: bote .45s ease-out; }
   .chispa { position: absolute; z-index: 2; width: 6px; height: 6px; pointer-events: none; animation: chispa .75s ease-out forwards; }
 
+  /* Barrios: las calles vienen agrupadas y plegadas; cada barrio se abre al tocarlo */
+  #lista > .barrio:first-child { margin-top: 10px; }
+  .barrio + .barrio { margin-top: 8px; }
+  .barrio-titulo { font-size: inherit; font-weight: inherit; }
+  .barrio-cab {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 56px;
+    padding: 9px 14px 9px 16px;
+    background: transparent;
+    border: 1.5px solid var(--plaza-blanco);
+    border-radius: var(--radius-hoja);
+    color: var(--plaza-blanco);
+    text-align: left;
+    cursor: pointer;
+  }
+  .barrio-cab:hover, .barrio-cab[aria-expanded="true"] { background: rgba(255, 255, 255, .12); }
+  .barrio-txt { flex: 1; min-width: 0; }
+  .barrio-nombre { display: block; font-size: 18px; font-weight: 800; line-height: 1.2; overflow-wrap: anywhere; }
+  .barrio-dato { display: block; font-size: 13px; font-weight: 400; line-height: 1.3; color: var(--texto-suave); }
+  .barrio-signo { flex: none; width: 20px; font-size: 24px; font-weight: 800; line-height: 1; text-align: center; }
+  .barrio-signo::before { content: "+"; }
+  .barrio-cab[aria-expanded="true"] .barrio-signo::before { content: "\2212"; }
+  .barrio .calles { margin: 8px 0 16px; }
+
+  /* Tarjeta de calle más compacta: menos aire, misma letra legible en la calle */
+  .calles { gap: 10px; }
+  .calle { contain-intrinsic-size: auto 236px; }
+  .placa { padding: 14px 16px 0; }
+  .placa-nombre { font-size: 20px; }
+  .calle-cuerpo { padding: 6px 16px 14px; }
+  .tramo { font-size: 16px; }
+  .nota-calle { font-size: 14px; }
+  .contador { min-height: 64px; margin-top: 10px; }
+  .contador-num { font-size: 28px; }
+  .acciones { margin-top: 10px; }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition: none !important; animation: none !important; }
     .plaza-hilo-dibuja { stroke-dasharray: none; stroke-dashoffset: 0; }
@@ -472,7 +511,9 @@ const guardado = {
 };
 
 const idCalle = c => [c.provincia, c.municipio, c.zona, c.calle, c.tramo].join('|');
-const idZona = c => c.municipio + '|' + c.zona;
+// El barrio sale de la columna «barrio» del Sheet o, si no existe, de «zona». El identificador de la
+// calle (idCalle) no cambia: tiene que coincidir con el que calcula el Apps Script.
+const idBarrio = c => c.municipio + '|' + c.barrio;
 
 // Titular de cartel: acaba siempre en punto rosa
 const cartel = html => '<h1 class="titulo">' + html + '<span class="punto" aria-hidden="true">.</span></h1>';
@@ -503,7 +544,9 @@ const estado = {
   idioma: null              // idioma elegido en Materiales
 };
 let rutaResuelta = false;   // si ya se ha decidido qué provincia abrir al entrar
-let municipiosVista = [];   // municipios de la provincia abierta, en el orden del filtro
+let municipiosVista = [];
+let gruposVista = new Map();   // barrios pintados en la lista: id -> sus calles
+let listaForzada = false;      // la lista se muestra desplegada entera (búsqueda o pocas calles)   // municipios de la provincia abierta, en el orden del filtro
 
 // «Alicante/Alacant» -> «alicante-alacant»: el nombre de la provincia en la dirección
 const slug = s => norm(s).replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
@@ -564,7 +607,7 @@ function firma() {
    ============================================================ */
 function aplicarDatos(d) {
   CALLES = (Array.isArray(d.calles) ? d.calles : [])
-    .map(c => ({ provincia: texto(c.provincia), municipio: texto(c.municipio), zona: texto(c.zona), calle: texto(c.calle), tramo: texto(c.tramo), nota: texto(c.nota) }))
+    .map(c => ({ provincia: texto(c.provincia), municipio: texto(c.municipio), zona: texto(c.zona), barrio: texto(c.barrio) || texto(c.zona), calle: texto(c.calle), tramo: texto(c.tramo), nota: texto(c.nota) }))
     .filter(c => c.provincia && c.calle);
   MATERIALES = (Array.isArray(d.materiales) ? d.materiales : [])
     .map(m => ({ grupo: texto(m.grupo) || 'Materiales', titulo: texto(m.titulo), descripcion: texto(m.descripcion), tipo: texto(m.tipo) || 'Doc', enlace: enlaceSeguro(m.enlace), idioma: idiomaDe(m.idioma) }))
@@ -778,13 +821,15 @@ function pintarSelector() {
   const estreno = marcadorPintado === null;
   const tarjetas = PROVINCIAS.map(p => {
     const filas = CALLES.filter(c => c.provincia === p);
-    const zonas = new Set(filas.map(idZona)).size;
+    const barrios = new Set(filas.filter(c => c.barrio).map(idBarrio)).size;
+    const municipios = new Set(filas.map(c => c.municipio)).size;
     const n = totalDe(p);
     const sube = !estreno && n > (provinciasPintadas[p] || 0);
     provinciasPintadas[p] = n;
     return '<li data-nombre="' + esc(p) + '"><button class="provincia" data-provincia="' + esc(p) + '">' +
       '<span><span class="provincia-nombre">' + conCorte(p) + '</span>' +
-      '<span class="provincia-dato">' + plural(filas.length, 'calle', 'calles') + ' en ' + plural(zonas, 'zona', 'zonas') + '</span></span>' +
+      '<span class="provincia-dato">' + plural(filas.length, 'calle', 'calles') + ' en ' +
+      (barrios ? plural(barrios, 'barrio', 'barrios') : plural(municipios, 'municipio', 'municipios')) + '</span></span>' +
       '<span class="provincia-conv' + (n ? '' : ' provincia-conv--cero') + (sube ? ' bote' : '') + '">' +
       n + '<span class="oculto"> ' + (n === 1 ? 'conversación' : 'conversaciones') + '</span>' +
       '</span></button></li>';
@@ -861,7 +906,7 @@ function pintarProvincia() {
     '<p class="resumen" id="resumen"></p>' +
     (fijada ? '<div id="fijada"></div><h2 class="seccion" id="titulo-todas">Todas las calles</h2>' : '') +
     '<label class="buscar">' +
-    '<input type="search" id="buscar" placeholder="Busca una calle o un municipio" aria-label="Busca una calle o un municipio" autocomplete="off" value="' + esc(estado.busqueda) + '"></label>' +
+    '<input type="search" id="buscar" placeholder="Busca una calle o un barrio" aria-label="Busca una calle o un barrio" autocomplete="off" value="' + esc(estado.busqueda) + '"></label>' +
     filtro +
     '<div id="lista"></div>' +
     '<p class="pie-nota" id="pie-calles"></p>' +
@@ -906,7 +951,7 @@ function pintarLista() {
   const q = norm(estado.busqueda.trim());
   const visibles = filas.filter(c =>
     (estado.municipio === null || c.municipio === estado.municipio) &&
-    (!q || norm(c.calle + ' ' + c.zona + ' ' + c.municipio).includes(q)));
+    (!q || norm(c.calle + ' ' + c.barrio + ' ' + c.municipio).includes(q)));
 
   if (!visibles.length) {
     $('#lista').innerHTML = '<div class="vacio"><p>No hay ninguna calle con «' + esc(estado.busqueda.trim()) +
@@ -915,12 +960,78 @@ function pintarLista() {
     return;
   }
 
-  // Las calles van seguidas, en el orden del Sheet, sin títulos de sección
-  // El municipio se rotula en la placa solo si la provincia tiene más de uno
   const conMunicipio = municipiosVista.length > 1;
-  $('#lista').innerHTML = '<ul class="calles">' + visibles.map(c => tarjetaCalle(c, conMunicipio)).join('') + '</ul>';
-  document.querySelectorAll('#lista .calle').forEach(li =>
+  const poblar = raiz => raiz.querySelectorAll('.calle').forEach(li =>
     ajustarEscena($('.calle-escena', li), Math.min(cuenta(li.dataset.calle), MAX_MINI), false, false));
+  gruposVista = new Map();
+
+  // Si la provincia no tiene barrios en el Sheet, las calles van seguidas
+  if (!filas.some(c => c.barrio)) {
+    $('#lista').innerHTML = '<ul class="calles">' + visibles.map(c => tarjetaCalle(c, conMunicipio)).join('') + '</ul>';
+    poblar($('#lista'));
+    return;
+  }
+
+  // Agrupadas por barrio y plegadas: se ve la lista de barrios y cada uno se abre al tocarlo
+  const grupos = [];
+  visibles.forEach(c => {
+    let g = grupos.find(x => x.id === idBarrio(c));
+    if (!g) { g = { id: idBarrio(c), barrio: c.barrio, municipio: c.municipio, calles: [] }; grupos.push(g); }
+    g.calles.push(c);
+  });
+  // Con una búsqueda, o cuando hay muy poco que enseñar, no tiene sentido plegar
+  listaForzada = !!q || visibles.length <= 4 || grupos.length === 1;
+  const abiertos = barriosAbiertos();
+  const verMunicipio = conMunicipio && estado.municipio === null;
+  $('#lista').innerHTML = grupos.map((g, n) => {
+    gruposVista.set(g.id, g.calles);
+    const abierto = listaForzada || abiertos.includes(g.id);
+    return '<section class="barrio" data-barrio="' + esc(g.id) + '">' +
+      '<h2 class="barrio-titulo"><button class="barrio-cab" aria-expanded="' + abierto + '" aria-controls="barrio-' + n + '">' +
+      '<span class="barrio-txt"><span class="barrio-nombre">' + esc(g.barrio || 'Otras calles') + '</span>' +
+      '<span class="barrio-dato">' + (verMunicipio && g.municipio ? esc(g.municipio) + ', ' : '') + plural(g.calles.length, 'calle', 'calles') + '</span></span>' +
+      globoBarrio(totalBarrio(g.id), false) +
+      '<span class="barrio-signo" aria-hidden="true"></span></button></h2>' +
+      '<ul class="calles" id="barrio-' + n + '"' + (abierto ? '' : ' hidden') + '>' +
+      (abierto ? g.calles.map(c => tarjetaCalle(c, false)).join('') : '') + '</ul></section>';
+  }).join('');
+  poblar($('#lista'));
+}
+
+// Conversaciones de un barrio de la lista, y el globo que las enseña en su cabecera
+function totalBarrio(id) {
+  return (gruposVista.get(id) || []).reduce((t, c) => t + cuenta(idCalle(c)), 0);
+}
+function globoBarrio(total, conBote) {
+  return '<span class="provincia-conv' + (total ? '' : ' provincia-conv--cero') + (conBote ? ' bote' : '') + '" data-n="' + total + '">' +
+    total + '<span class="oculto"> ' + (total === 1 ? 'conversación' : 'conversaciones') + '</span></span>';
+}
+
+// Los barrios que esta persona dejó abiertos en cada provincia se recuerdan en su móvil
+function barriosAbiertos() {
+  const todo = guardado.leer('sac:barrios', null);
+  const lista = todo && typeof todo === 'object' ? todo[estado.provincia] : null;
+  return Array.isArray(lista) ? lista : [];
+}
+function recordarBarrio(id, abierto) {
+  const leido = guardado.leer('sac:barrios', null);
+  const todo = leido && typeof leido === 'object' ? leido : {};
+  const lista = new Set(Array.isArray(todo[estado.provincia]) ? todo[estado.provincia] : []);
+  if (abierto) lista.add(id); else lista.delete(id);
+  todo[estado.provincia] = [...lista];
+  guardado.escribir('sac:barrios', todo);
+}
+
+// Abre o cierra un barrio. Las calles se pintan al abrir y se retiran al cerrar.
+function alternarBarrio(cabecera) {
+  const seccion = cabecera.closest('.barrio'), lista = $('.calles', seccion), id = seccion.dataset.barrio;
+  const abrir = cabecera.getAttribute('aria-expanded') !== 'true';
+  cabecera.setAttribute('aria-expanded', String(abrir));
+  lista.hidden = !abrir;
+  lista.innerHTML = abrir ? (gruposVista.get(id) || []).map(c => tarjetaCalle(c, false)).join('') : '';
+  lista.querySelectorAll('.calle').forEach(li =>
+    ajustarEscena($('.calle-escena', li), Math.min(cuenta(li.dataset.calle), MAX_MINI), false, false));
+  if (!listaForzada) recordarBarrio(id, abrir);
 }
 
 // Cambia solo los números que han variado, sin repintar: la gente sigue paseando y entra la nueva
@@ -936,6 +1047,13 @@ function actualizarCifras() {
     caja.dataset.n = n;
     $('.contador-cifra', li).innerHTML = cifra(n, true);
     ajustarEscena($('.calle-escena', li), Math.min(n, MAX_MINI), false, true);
+  });
+  // El total de cada barrio, esté abierto o plegado
+  document.querySelectorAll('#lista .barrio').forEach(seccion => {
+    const total = totalBarrio(seccion.dataset.barrio), globo = $('.provincia-conv', seccion);
+    if (Number(globo.dataset.n) === total) return;
+    cambios = true;
+    globo.outerHTML = globoBarrio(total, true);
   });
   pintarResumen(cambios);
 }
@@ -1024,6 +1142,8 @@ $('#v-calles').addEventListener('click', e => {
     if (titulo) titulo.remove();
     return;
   }
+  const cabecera = e.target.closest('.barrio-cab');
+  if (cabecera) { alternarBarrio(cabecera); return; }
   const chip = e.target.closest('.zona-chip');
   if (chip) {
     estado.municipio = chip.hasAttribute('data-todos') ? null : chip.dataset.municipio;
